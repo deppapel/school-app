@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 from flask import Flask, render_template, request, redirect
 from config import Config
 from models import db, Student, Subject, Result
@@ -61,7 +61,7 @@ def results():
 
 if __name__ == "__main__":
     app.run(debug=True)
-=======
+
 from flask import Flask, render_template, request, redirect
 from config import Config
 from models import db, Student, Subject, Result
@@ -124,4 +124,4 @@ def results():
 
 if __name__ == "__main__":
     app.run(debug=True)
->>>>>>> 71d5ac3407a9428aa7ea493a322bf9d033f9ebf5
+

@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -19,7 +19,7 @@ class Result(db.Model):
 
     student = db.relationship('Student')
     subject = db.relationship('Subject')
-=======
+
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -40,4 +40,3 @@ class Result(db.Model):
 
     student = db.relationship('Student')
     subject = db.relationship('Subject')
->>>>>>> 71d5ac3407a9428aa7ea493a322bf9d033f9ebf5
