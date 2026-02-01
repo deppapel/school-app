@@ -1,11 +1,6 @@
-<<<<<<< HEAD
+
 Flask
 Flask-SQLAlchemy
 gunicorn
 psycopg2-binary
-=======
-Flask
-Flask-SQLAlchemy
-gunicorn
-psycopg2-binary
->>>>>>> 71d5ac3407a9428aa7ea493a322bf9d033f9ebf5
+
