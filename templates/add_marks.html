@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <h2>Add Marks</h2>
 <form method="POST">
     Student:
@@ -19,3 +20,26 @@
 
     <button type="submit">Save</button>
 </form>
+=======
+<h2>Add Marks</h2>
+<form method="POST">
+    Student:
+    <select name="student">
+        {% for s in students %}
+        <option value="{{ s.id }}">{{ s.name }}</option>
+        {% endfor %}
+    </select><br>
+
+    Subject:
+    <select name="subject">
+        {% for sub in subjects %}
+        <option value="{{ sub.id }}">{{ sub.subject_name }}</option>
+        {% endfor %}
+    </select><br>
+
+    Marks:
+    <input type="number" name="marks" required><br>
+
+    <button type="submit">Save</button>
+</form>
+>>>>>>> 71d5ac3407a9428aa7ea493a322bf9d033f9ebf5

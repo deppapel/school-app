@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <h2>Results</h2>
 <table border="1">
 <tr>
@@ -22,3 +23,29 @@
 </tr>
 {% endfor %}
 </table>
+=======
+<h2>Results</h2>
+<table border="1">
+<tr>
+    <th>Student</th>
+    {% for subject in subjects %}
+        <th>{{ subject.subject_name }}</th>
+    {% endfor %}
+</tr>
+
+{% for student in students %}
+<tr>
+    <td>{{ student.name }}</td>
+    {% for subject in subjects %}
+        <td>
+        {% for r in results %}
+            {% if r.student_id == student.id and r.subject_id == subject.id %}
+                {{ r.marks }}
+            {% endif %}
+        {% endfor %}
+        </td>
+    {% endfor %}
+</tr>
+{% endfor %}
+</table>
+>>>>>>> 71d5ac3407a9428aa7ea493a322bf9d033f9ebf5
