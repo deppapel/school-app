@@ -18,31 +18,34 @@ def index():
 @app.route("/add_student", methods=["GET", "POST"])
 def add_student():
     if request.method == "POST":
-        name = request.form["name"]
-        student = Student(name=name)
-    try:    
-        db.session.add(student)
-        db.session.commit()
-        flash('Student added succesfully!')
-        return redirect("/")
-    except Exception as e:
-        db.session.rollback()
-        flash('Error adding student')
+
+        try:    
+            name = request.form["name"]
+            student = Student(name=name)
+            db.session.add(student)
+            db.session.commit()
+            flash('Student added succesfully!')
+            return redirect("/")
+        except Exception as e:
+            db.session.rollback()
+            flash('Error adding student')
+
     return render_template("add_student.html")
 
 @app.route("/add_subject", methods=["GET", "POST"])
 def add_subject():
     if request.method == "POST":
-        subject_name = request.form["subject_name"]
-        subject = Subject(subject_name=subject_name)
-    try:    
-        db.session.add(subject)
-        db.session.commit()
-        flash('Subject added succesfully!')
-        return redirect("/")
-    except Exception as e:
-        db.session.rollback()
-        flash('Error adding subject!')
+        try:    
+            subject_name = request.form["subject_name"]
+            subject = Subject(subject_name=subject_name)
+    
+            db.session.add(subject)
+            db.session.commit()
+            flash('Subject added succesfully!')
+            return redirect("/")
+        except Exception as e:
+            db.session.rollback()
+            flash('Error adding subject!')
     return render_template("add_subject.html")
 
 @app.route("/add_marks", methods=["GET", "POST"])
@@ -51,19 +54,20 @@ def add_marks():
     subjects = Subject.query.all()
 
     if request.method == "POST":
-        student_id = request.form["student"]
-        subject_id = request.form["subject"]
-        marks = request.form["marks"]
+        try:    
+            student_id = request.form["student"]
+            subject_id = request.form["subject"]
+            marks = request.form["marks"]
 
-        result = Result(student_id=student_id, subject_id=subject_id, marks=marks)
-    try:    
-        db.session.add(result)
-        db.session.commit()
-        flash('Marks added succesfully!')
-        return redirect("/results")
-    except Exception as e:
-        db.sessionrollback()
-        flash('Error adding student marks')
+            result = Result(student_id=student_id, subject_id=subject_id, marks=marks)
+        
+            db.session.add(result)
+            db.session.commit()
+            flash('Marks added succesfully!')
+            return redirect("/results")
+        except Exception as e:
+            db.sessionrollback()
+            flash('Error adding student marks')
 
     return render_template("add_marks.html", students=students, subjects=subjects)
 
