@@ -113,48 +113,77 @@ def download_marks_template():
 # ---------------- UPLOAD EXCEL MARKS ----------------
 @app.route("/import_marks", methods=["GET", "POST"])
 def import_marks():
-    if request.method == "POST":
+    if request.method == "GET":
+        return render_template("import_marks.html")
+
+    try:
+        if "file" not in request.files:
+            flash("No file uploaded", "error")
+            return redirect("/import_marks")
+
         file = request.files["file"]
+
+        if file.filename == "":
+            flash("No file selected", "error")
+            return redirect("/import_marks")
 
         try:
             df = pd.read_excel(file)
+        except Exception:
+            flash("Invalid Excel file", "error")
+            return redirect("/import_marks")
 
-            for _, row in df.iterrows():
-                student = Student.query.filter_by(
-                    name=row["student_name"]
-                ).first()
+        if "student_name" not in df.columns:
+            flash("Excel must contain a 'student_name' column", "error")
+            return redirect("/import_marks")
 
-                subject = Subject.query.filter_by(
-                    subject_name=row["subject_name"]
-                ).first()
+        subjects = Subject.query.all()
+        subject_map = {s.subject_name: s.id for s in subjects}
 
-                if not student or not subject:
-                    continue  # skip invalid rows
+        for _, row in df.iterrows():
+            student_name = row["student_name"]
+
+            if pd.isna(student_name):
+                continue
+
+            student = Student.query.filter_by(name=str(student_name).strip()).first()
+            if not student:
+                continue
+
+            for subject_name, subject_id in subject_map.items():
+                if subject_name not in df.columns:
+                    continue
+
+                mark = row[subject_name]
+                if pd.isna(mark):
+                    continue
+
+                try:
+                    mark = float(mark)
+                except ValueError:
+                    continue
 
                 existing = Result.query.filter_by(
                     student_id=student.id,
-                    subject_id=subject.id
+                    subject_id=subject_id
                 ).first()
 
                 if existing:
-                    existing.marks = row["marks"]
+                    existing.marks = mark
                 else:
-                    result = Result(
-                        student_id=student.id,
-                        subject_id=subject.id,
-                        marks=row["marks"]
+                    db.session.add(
+                        Result(student_id=student.id, subject_id=subject_id, marks=mark)
                     )
-                    db.session.add(result)
 
-            db.session.commit()
-            flash("Marks imported successfully!")
-            return redirect("/results")
+        db.session.commit()
+        flash("Marks uploaded successfully", "success")
+        return redirect("/results")
 
-        except:
-            db.session.rollback()
-            flash("Error importing marks")
+    except Exception as e:
+        db.session.rollback()
+        flash("Something went wrong. Upload failed.", "error")
+        return redirect("/import_marks")
 
-    return render_template("import_marks.html")
 
 
 # ---------------- VIEW RESULTS ----------------
