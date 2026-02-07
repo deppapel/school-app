@@ -95,13 +95,14 @@ def download_marks_template():
     data = []
 
     for student in students:
+        row = {
+            "student_name": student.name
+        }
         for subject in subjects:
-            data.append({
-                "student_name": student.name,
-                "subject_name": subject.subject_name,
-                "marks": ""
-            })
-
+            row[subject.subject_name] = ""
+            
+        data.append(row)
+        
     df = pd.DataFrame(data)
     file_name = "marks_template.xlsx"
     df.to_excel(file_name, index=False)
