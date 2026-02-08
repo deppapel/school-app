@@ -12,7 +12,7 @@ class Student(db.Model):
     first_name = db.Column(db.String(100), nullable=False)
     second_name = db.Column(db.String(50))
 
-    results = db.relationship(
+    result = db.relationship(
         "Result", backref="student", cascade="all, delete-orphan"
     )
 
@@ -26,7 +26,7 @@ class Subject(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     subject_name = db.Column(db.String(100), unique=True, nullable=False)
 
-    results=db.relationship(
+    result=db.relationship(
         "Result", backref="subject", cascade="all, delete-orphan"
     )
     def __repr__(self):
