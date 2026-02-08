@@ -15,21 +15,39 @@ with app.app_context():
 def index():
     return render_template("index.html")
 
+def grade_and_points(mark):
+    if mark >= 80:
+        return "A", 12
+    elif mark >= 70:
+        return "B", 10
+    elif mark >= 60:
+        return "C", 8
+    elif mark >= 50:
+        return "D", 6
+    else:
+        return "E", 2
+
 
 # ---------------- ADD STUDENT ----------------
 @app.route("/add_student", methods=["GET", "POST"])
 def add_student():
     if request.method == "POST":
         try:
-            name = request.form["name"]
-            student = Student(name=name)
+            adm_no = request.form["adm_no"]
+            first_name = request.form["first_name"]
+            second_name = request.form["second_name"]
+            student = Student(
+                adm_no=adm_no,
+                first_name=first_name,
+                second_name=second_name
+            )
             db.session.add(student)
             db.session.commit()
             flash("Student added successfully!")
             return redirect("/")
         except:
             db.session.rollback()
-            flash("Error adding student")
+            flash("Error adding student, adm_no already exists!!")
 
     return render_template("add_student.html")
 
@@ -96,7 +114,7 @@ def download_marks_template():
 
     for student in students:
         row = {
-            "student_name": student.name
+            "adm_no": student.adm_no
         }
         for subject in subjects:
             row[subject.subject_name] = ""
@@ -133,20 +151,21 @@ def import_marks():
             flash("Invalid Excel file", "error")
             return redirect("/import_marks")
 
-        if "student_name" not in df.columns:
-            flash("Excel must contain a 'student_name' column", "error")
+        if "adm_no" not in df.columns:
+            flash("Excel must contain a 'adm_no' column", "error")
             return redirect("/import_marks")
 
         subjects = Subject.query.all()
         subject_map = {s.subject_name: s.id for s in subjects}
 
         for _, row in df.iterrows():
-            student_name = row["student_name"]
+            adm_no = str(row["adm_no"]).strip()
 
-            if pd.isna(student_name):
+            student = Student.query.filter_by(adm_no=adm_no).first()
+
+            if pd.isna(adm_no):
                 continue
 
-            student = Student.query.filter_by(name=str(student_name).strip()).first()
             if not student:
                 continue
 
@@ -163,6 +182,8 @@ def import_marks():
                 except ValueError:
                     continue
 
+                grade, points = grade_and_points(mark)
+
                 existing = Result.query.filter_by(
                     student_id=student.id,
                     subject_id=subject_id
@@ -170,9 +191,11 @@ def import_marks():
 
                 if existing:
                     existing.marks = mark
+                    existing.grade = grade
+                    existing.points = points
                 else:
                     db.session.add(
-                        Result(student_id=student.id, subject_id=subject_id, marks=mark)
+                        Result(student_id=student.id, subject_id=subject_id, marks=mark, grade=grade, points=points)
                     )
 
         db.session.commit()
@@ -191,12 +214,10 @@ def import_marks():
 def results():
     students = Student.query.all()
     subjects = Subject.query.all()
-    results = Result.query.all()
     return render_template(
         "view_results.html",
         students=students,
         subjects=subjects,
-        results=results
     )
 
 
