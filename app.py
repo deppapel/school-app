@@ -163,8 +163,7 @@ def import_marks():
 
             student = Student.query.filter_by(adm_no=adm_no).first()
 
-            if pd.isna(adm_no):
-                continue
+            
 
             if not student:
                 continue
