@@ -13,12 +13,10 @@
     </tr>
 
     {% for student in students %}
+    {% set ns = namespace(total_marks=0, total_points=0) %}
     <tr>
         <td>{{ student.adm_no }}</td>
         <td>{{ student.first_name }} {{ student.second_name }}</td>
-
-        {% set total_marks = 0 %}
-        {% set total_points = 0 %}
 
         {% for subject in subjects %}
             <td>
@@ -26,8 +24,8 @@
                 {% for result in student.results %}
                     {% if result.subject_id == subject.id %}
                         {{ result.marks }} ({{ result.grade }})
-                        {% set total_marks = total_marks + result.marks %}
-                        {% set total_points = total_points + result.points %}
+                        {% set ns.total_marks = ns.total_marks + result.marks %}
+                        {% set ns.total_points = ns.total_points + result.points %}
                         {% set found = true %}
                     {% endif %}
                 {% endfor %}
@@ -35,19 +33,20 @@
             </td>
         {% endfor %}
 
-        <td>{{ total_marks }}</td>
-        <td>{{ total_points }}</td>
+        <td>{{ ns.total_marks }}</td>
+        <td>{{ ns.total_points }}</td>
         <td>
-            {% if total_points >= 70 %}A
-            {% elif total_points >= 60 %}B
-            {% elif total_points >= 50 %}C
-            {% elif total_points >= 40 %}D
+            {% if ns.total_points >= 70 %}A
+            {% elif ns.total_points >= 60 %}B
+            {% elif ns.total_points >= 50 %}C
+            {% elif ns.total_points >= 40 %}D
             {% else %}E
             {% endif %}
         </td>
     </tr>
     {% endfor %}
 </table>
+
 
 
 
