@@ -166,15 +166,15 @@ def import_marks():
             
 
             if not student:
-                continue
+                flash("Student must be present")
 
             for subject_name, subject_id in subject_map.items():
                 if subject_name not in df.columns:
-                    continue
+                    flash("subject name must be in column")
 
                 mark = row[subject_name]
                 if pd.isna(mark):
-                    continue
+                    flash("mark not available")
 
                 try:
                     mark = float(mark)
