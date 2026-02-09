@@ -59,8 +59,7 @@ class Result(db.Model):
     grade = db.Column(db.String(2), nullable=False)
     points = db.Column(db.Integer, nullable=False)
 
-    student = db.relationship("Student", backref="results")
-    subject = db.relationship("Subject")
+    
     
    # PREVENT DUPLICATE
     __table_args__ = (
