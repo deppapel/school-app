@@ -160,16 +160,29 @@ def add_marks():
 @app.route("/download_marks_template")
 def download_marks_template():
     students = Student.query.all()
-    subjects = Subject.query.all()
     
-    columns = ["adm_no", "student_name"] + [s.subject_name for s in subjects]
+    COMPULSORY_SUBJECTS = [
+        "English",
+        "Mathematics",
+        "Biology",
+        "Chemistry",
+        "Physics",
+        "Kiswahili"
+    ]
+    
+    columns = ["adm_no", "student_name"] + COMPULSORY_SUBJECTS + ["ARTS", "APPLIED"]
 
     data = []
 
     for student in students:
         row = {"adm_no": student.adm_no, "student_name": student.first_name}
-        for subject in subjects:
-            row[subject.subject_name] = ""
+
+        for subject in COMPULSORY_SUBJECTS:
+            row[subject] = ""
+
+        row["ARTS"] = "" 
+        row["APPLIED"] = "" 
+        
         data.append(row)
 
     if not data:
