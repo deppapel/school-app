@@ -114,7 +114,8 @@ def download_marks_template():
 
     for student in students:
         row = {
-            "adm_no": student.adm_no
+            "adm_no": student.adm_no, 
+            "student_name":student.first_name
         }
         for subject in subjects:
             row[subject.subject_name] = ""
