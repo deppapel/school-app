@@ -59,10 +59,11 @@ def grade_and_points(mark):
     else:
         return "E", 2
 
-def save_result(student_id, subject_id, mark, grade, points):
+def save_or_update_result(student, subject, mark):
+    grade, points = grade_and_points(mark)
     existing = Result.query.filter_by(
-        student_id=student_id,
-        subject_id=subject_id
+        student_id=student.id,
+        subject_id=subject.id
     ).first()
 
     if existing:
@@ -72,8 +73,8 @@ def save_result(student_id, subject_id, mark, grade, points):
     else:
         db.session.add(
             Result(
-                student_id=student_id,
-                subject_id=subject_id,
+                student_id=student.id,
+                subject_id=subject.id,
                 marks=mark,
                 grade=grade,
                 points=points
@@ -214,99 +215,108 @@ def import_marks():
         return render_template("import_marks.html")
 
     try:
+        # 1️⃣ Check if file is uploaded
         if "file" not in request.files:
             flash("No file uploaded", "error")
             return redirect("/import_marks")
 
         file = request.files["file"]
-
         if file.filename == "":
             flash("No file selected", "error")
             return redirect("/import_marks")
 
+        # 2️⃣ Read Excel
         try:
             df = pd.read_excel(file)
         except Exception:
             flash("Invalid Excel file", "error")
             return redirect("/import_marks")
 
+        # 3️⃣ Validate mandatory column
         if "adm_no" not in df.columns:
             flash("Excel must contain an 'adm_no' column", "error")
             return redirect("/import_marks")
 
+        # 4️⃣ Fetch subjects from DB
         compulsory_subjects = Subject.query.filter_by(category="COMPULSORY").all()
+        arts_subjects = Subject.query.filter_by(category="ARTS").all()
+        applied_subjects = Subject.query.filter_by(category="APPLIED").all()
 
         for _, row in df.iterrows():
             adm_no = str(row["adm_no"]).strip()
-
             if pd.isna(adm_no):
-                continue
+                continue  # skip blank rows
 
             student = Student.query.filter_by(adm_no=adm_no).first()
             if not student:
+                flash(f"Student with adm_no {adm_no} not found. Skipping row.", "warning")
                 continue
 
-            # -------- COMPULSORY SUBJECTS --------
+            subject_count = 0
+            total_points = 0
+
+            # 5️⃣ Handle compulsory subjects
             for subject in compulsory_subjects:
                 if subject.subject_name not in df.columns:
+                    flash(f"Compulsory subject '{subject.subject_name}' missing in Excel.", "warning")
                     continue
 
                 mark = row[subject.subject_name]
                 if pd.isna(mark):
+                    flash(f"Mark for {subject.subject_name} is missing for student {adm_no}.", "warning")
                     continue
 
                 try:
                     mark = float(mark)
                 except ValueError:
+                    flash(f"Invalid mark for {subject.subject_name} for student {adm_no}.", "warning")
                     continue
 
-                grade, points = grade_and_points(mark)
-                save_result(student.id, subject.id, mark, grade, points)
+                save_or_update_result(student, subject, mark)
+                subject_count += 1
+                total_points += grade_and_points(mark)[1]
 
-            # -------- ARTS SUBJECT --------
-            if "ARTS" in df.columns:
+            # 6️⃣ Handle ARTS
+            if "ARTS" in df.columns and student.arts_subject_id:
                 arts_mark = row["ARTS"]
                 if not pd.isna(arts_mark):
                     try:
                         arts_mark = float(arts_mark)
-                        grade, points = grade_and_points(arts_mark)
-                        save_result(
-                            student.id,
-                            student.arts_subject_id,
-                            arts_mark,
-                            grade,
-                            points
-                        )
+                        save_or_update_result(student, student.arts_subject, arts_mark)
+                        subject_count += 1
+                        total_points += grade_and_points(arts_mark)[1]
                     except ValueError:
-                        pass
+                        flash(f"Invalid Arts mark for student {adm_no}.", "warning")
 
-            # -------- APPLIED SUBJECT --------
-            if "APPLIED" in df.columns:
+            # 7️⃣ Handle APPLIED
+            if "APPLIED" in df.columns and student.applied_subject_id:
                 applied_mark = row["APPLIED"]
                 if not pd.isna(applied_mark):
                     try:
                         applied_mark = float(applied_mark)
-                        grade, points = grade_and_points(applied_mark)
-                        save_result(
-                            student.id,
-                            student.applied_subject_id,
-                            applied_mark,
-                            grade,
-                            points
-                        )
+                        save_or_update_result(student, student.applied_subject, applied_mark)
+                        subject_count += 1
+                        total_points += grade_and_points(applied_mark)[1]
                     except ValueError:
-                        pass
+                        flash(f"Invalid Applied mark for student {adm_no}.", "warning")
 
+            # 8️⃣ Validation: max subjects
+            if subject_count > 8:
+                flash(f"Student {adm_no} has more than 8 subjects. Skipping extra subjects.", "warning")
+
+            # 9️⃣ Validation: max points
+            if total_points > 96:
+                flash(f"Total points for student {adm_no} exceeds 96.", "warning")
+
+        # 10️⃣ Commit everything once per file
         db.session.commit()
-        flash("Marks uploaded successfully", "success")
+        flash("Marks uploaded successfully!", "success")
         return redirect("/results")
 
-    except Exception:
+    except Exception as e:
         db.session.rollback()
-        flash("Something went wrong. Upload failed.", "error")
+        flash(f"Upload failed: {str(e)}", "error")
         return redirect("/import_marks")
-
-
 
 
 # ---------------- VIEW RESULTS ----------------
