@@ -161,6 +161,9 @@ def add_marks():
 def download_marks_template():
     students = Student.query.all()
     subjects = Subject.query.all()
+    
+    columns = ["adm_no", "student_name"] + [s.subject_name for s in subjects]
+
     data = []
 
     for student in students:
@@ -169,7 +172,10 @@ def download_marks_template():
             row[subject.subject_name] = ""
         data.append(row)
 
-    df = pd.DataFrame(data)
+    if not data:
+        data.append({col: "" for col in columns})    
+
+    df = pd.DataFrame(data, columns=columns)
     tmp = tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False)
     df.to_excel(tmp.name, index=False)
     tmp.close()
