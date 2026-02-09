@@ -4,6 +4,21 @@
     <input type="text" name="adm_no" placeholder="ADM_NO" required>
     <input type="text" name="first_name" placeholder="First Name" required>
     <input type="text" name="second_name" placeholder="Second Name" >
+
+    <label>Arts Subject</label>
+    <select name="arts_subject" required>
+      {% for subject in arts_subjects %}
+        <option value="{{subject.id}}">{{subject.subject_name}}</option>
+      {% endfor %}  
+    </select>
+
+    <label>Applied Subject</label>
+    <select name="applied_subject" required>
+      {% for subject in applied_subjects %}
+        <option value="{{subject.id}}">{{subject.subject_name}}</option>
+      {% endfor %}  
+    </select>
+
     <button type="submit">Save</button>
 </form>
 

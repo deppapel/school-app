@@ -12,6 +12,20 @@ class Student(db.Model):
     first_name = db.Column(db.String(100), nullable=False)
     second_name = db.Column(db.String(50))
 
+    #optional subjects
+    arts_subject_id = db.Column(
+        db.Integer, db.ForeignKey("subject.id"), nullable=False
+    )
+
+    applied_subject_id = db.Column(
+        db.Integer, db.ForeignKey("subject.id"), nullable=False
+    )
+    arts_subject = db.relationship(
+        "Subject", foreign_keys=[arts_subject_id]
+    )
+    applied_subject = db.relationship(
+        "Subject", foreign_keys=[applied_subject_id]
+    )
     results = db.relationship(
         "Result", backref="student", cascade="all, delete-orphan"
     )
@@ -26,11 +40,13 @@ class Subject(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     subject_name = db.Column(db.String(100), unique=True, nullable=False)
 
+    category = db.Column(db.Enum("COMPULSORY", "ARTS", "APPLIED", name="subject_category"), nullable=False)
+
     results=db.relationship(
         "Result", backref="subject", cascade="all, delete-orphan"
     )
     def __repr__(self):
-        return f"<Subject {self.subject_name}>"    
+        return f"<Subject {self.subject_name} ({self.category})>"    
 
 
 class Result(db.Model):
@@ -40,14 +56,17 @@ class Result(db.Model):
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'), nullable=False)
     marks = db.Column(db.Float, nullable=False)
-    grade = db.Column(db.String(2))
-    points = db.Column(db.Integer)
+    grade = db.Column(db.String(2), nullable=False)
+    points = db.Column(db.Integer, nullable=False)
 
+    student = db.relationship("Student", backref="results")
+    subject = db.relationship("Subject")
+    
    # PREVENT DUPLICATE
     __table_args__ = (
         db.UniqueConstraint("student_id", "subject_id", name="unique_student_subject"),
    )
 
     def __repr__(self):
-        return f"<Result {self.student_id}-{self.subject_id}: {self.marks}>"
+        return f"<Result S{self.student_id}-Sub{self.subject_id}: {self.marks}>"
 

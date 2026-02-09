@@ -24,7 +24,7 @@
                 {% for result in student.results %}
                     {% if result.subject_id == subject.id %}
                         {{ result.marks }} ({{ result.grade }})
-                        {% set ns.total_marks = ns.total_marks + result.marks %}
+                        {% set ns.total_marks = ns.total_marks + result.mark %}
                         {% set ns.total_points = ns.total_points + result.points %}
                         {% set found = true %}
                     {% endif %}
@@ -36,10 +36,15 @@
         <td>{{ ns.total_marks }}</td>
         <td>{{ ns.total_points }}</td>
         <td>
-            {% if ns.total_points >= 70 %}A
-            {% elif ns.total_points >= 60 %}B
-            {% elif ns.total_points >= 50 %}C
-            {% elif ns.total_points >= 40 %}D
+            {% if ns.total_points >= 86 %}A
+            {% elif ns.total_points >= 82 %}A-
+            {% elif ns.total_points >= 78 %}B+
+            {% elif ns.total_points >= 74 %}B
+            {% elif ns.total_points >= 70 %}B-
+            {% elif ns.total_points >= 66 %}C+
+            {% elif ns.total_points >= 62 %}C
+            {% elif ns.total_points >= 58 %}C-
+            {% elif ns.total_points >= 48 %}D
             {% else %}E
             {% endif %}
         </td>
