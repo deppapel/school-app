@@ -5,13 +5,10 @@
         <th>Adm No</th>
         <th>Name</th>
 
-        <!-- Compulsory subjects -->
-        {% for subject in compulsory_subjects %}
+        {% for subject in subjects %}
             <th>{{ subject.subject_name }}</th>
         {% endfor %}
 
-        <th>Arts</th>
-        <th>Applied</th>
         <th>Total Points</th>
         <th>Final Grade</th>
     </tr>
@@ -21,8 +18,7 @@
         <td>{{ entry.student.adm_no }}</td>
         <td>{{ entry.student.first_name }}</td>
 
-        <!-- Compulsory marks -->
-        {% for subject in compulsory_subjects %}
+        {% for subject in subjects %}
             <td>
                 {% for r in entry.results %}
                     {% if r.subject_id == subject.id %}
@@ -32,29 +28,12 @@
             </td>
         {% endfor %}
 
-        <!-- Arts -->
-        <td>
-            {% for r in entry.results %}
-                {% if r.subject_id == entry.student.arts_subject_id %}
-                    {{ r.marks }} ({{ r.subject.subject_name }})
-                {% endif %}
-            {% endfor %}
-        </td>
-
-        <!-- Applied -->
-        <td>
-            {% for r in entry.results %}
-                {% if r.subject_id == entry.student.applied_subject_id %}
-                    {{ r.marks }} ({{ r.subject.subject_name }})
-                {% endif %}
-            {% endfor %}
-        </td>
-
         <td><strong>{{ entry.total_points }}</strong></td>
         <td><strong>{{ entry.final_grade }}</strong></td>
     </tr>
     {% endfor %}
 </table>
+
 
 
 
