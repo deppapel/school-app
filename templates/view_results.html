@@ -4,7 +4,7 @@
   — Final Grade: <strong>{{ entry.final_grade }}</strong>
 </h3>
 
-<table border="1">
+<table border="1" style="border-collapse: collapse;">
     <tr>
         <th>Subject</th>
         <th>Marks</th>
@@ -25,6 +25,7 @@
         <td><strong>Total</strong></td>
         <td colspan="2">{{ entry.total_subjects }} Subjects</td>
         <td><strong>{{ entry.total_points }}</strong></td>
+        <td><strong>{{ entry.final_grade }}</strong></td>
     </tr>
 </table>
 {% endfor %}

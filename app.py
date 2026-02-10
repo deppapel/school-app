@@ -342,7 +342,8 @@ def results():
             "student": student,
             "results": results,
             "total_points": total_points,
-            "total_subjects": total_subjects
+            "total_subjects": total_subjects,
+            "final_grade": final_grade 
         })
 
     return render_template(
