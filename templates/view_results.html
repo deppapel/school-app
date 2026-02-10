@@ -1,56 +1,34 @@
-<h2>Results</h2>
+{% for entry in student_data %}
+<h3>
+  {{ entry.student.first_name }} ({{ entry.student.adm_no }})
+  — Final Grade: <strong>{{ entry.final_grade }}</strong>
+</h3>
 
-<table border="1" style="border-collapse: collapse; width: 100%;">
+<table border="1">
     <tr>
-        <th>Adm No</th>
-        <th>Student Name</th>
-        {% for subject in subjects %}
-            <th>{{ subject.subject_name }}</th>
-        {% endfor %}
-        <th>Total Marks</th>
-        <th>Total Points</th>
+        <th>Subject</th>
+        <th>Marks</th>
         <th>Grade</th>
+        <th>Points</th>
     </tr>
 
-    {% for student in students %}
-    {% set ns = namespace(total_marks=0, total_points=0) %}
+    {% for result in entry.results %}
     <tr>
-        <td>{{ student.adm_no }}</td>
-        <td>{{ student.first_name }} {{ student.second_name }}</td>
-
-        {% for subject in subjects %}
-            <td>
-                {% set found = false %}
-                {% for result in student.results %}
-                    {% if result.subject_id == subject.id %}
-                        {{ result.marks }} ({{ result.grade }})
-                        {% set ns.total_marks = ns.total_marks + result.mark %}
-                        {% set ns.total_points = ns.total_points + result.points %}
-                        {% set found = true %}
-                    {% endif %}
-                {% endfor %}
-                {% if not found %}-{% endif %}
-            </td>
-        {% endfor %}
-
-        <td>{{ ns.total_marks }}</td>
-        <td>{{ ns.total_points }}</td>
-        <td>
-            {% if ns.total_points >= 86 %}A
-            {% elif ns.total_points >= 82 %}A-
-            {% elif ns.total_points >= 78 %}B+
-            {% elif ns.total_points >= 74 %}B
-            {% elif ns.total_points >= 70 %}B-
-            {% elif ns.total_points >= 66 %}C+
-            {% elif ns.total_points >= 62 %}C
-            {% elif ns.total_points >= 58 %}C-
-            {% elif ns.total_points >= 48 %}D
-            {% else %}E
-            {% endif %}
-        </td>
+        <td>{{ result.subject.subject_name }}</td>
+        <td>{{ result.marks }}</td>
+        <td>{{ result.grade }}</td>
+        <td>{{ result.points }}</td>
     </tr>
     {% endfor %}
+
+    <tr>
+        <td><strong>Total</strong></td>
+        <td colspan="2">{{ entry.total_subjects }} Subjects</td>
+        <td><strong>{{ entry.total_points }}</strong></td>
+    </tr>
 </table>
+{% endfor %}
+
 
 
 

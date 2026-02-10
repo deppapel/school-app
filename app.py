@@ -57,6 +57,29 @@ def grade_and_points(mark):
         return "D", 6
     else:
         return "E", 2
+    
+def student_final_grade(total_points):
+    if total_points >= 86:
+        return "A"
+    elif total_points >= 82:
+        return "A-"
+    elif total_points >= 78:
+        return "B+"
+    elif total_points >= 74:
+        return "B"
+    elif total_points >= 70:
+        return "B-"
+    elif total_points >= 66:
+        return "C+"
+    elif total_points >= 62:
+        return "C"
+    elif total_points >= 58:
+        return "C-"
+    elif total_points >= 48:
+        return "D"
+    else:
+        return "E"
+    
 
 
 def save_or_update_result(student, subject, mark):
@@ -301,9 +324,32 @@ def import_marks():
 # ---------------- VIEW RESULTS ----------------
 @app.route("/results")
 def results():
+
     students = Student.query.all()
-    subjects = Subject.query.all()
-    return render_template("view_results.html", students=students, subjects=subjects)
+
+    student_data = []
+
+    for student in students:
+
+        results = Result.query.filter_by(student_id=student.id).all()
+
+        total_points = sum(r.points for r in results)
+        total_subjects = len(results)
+
+        final_grade = student_final_grade(total_points)
+
+        student_data.append({
+            "student": student,
+            "results": results,
+            "total_points": total_points,
+            "total_subjects": total_subjects
+        })
+
+    return render_template(
+        "view_results.html",
+        student_data=student_data
+    )
+
 
 
 if __name__ == "__main__":
