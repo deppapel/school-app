@@ -10,29 +10,42 @@
         {% endfor %}
 
         <th>Total Points</th>
-        <th>Final Grade</th>
+        <th>Grade</th>
     </tr>
 
-    {% for entry in student_data %}
+    {% for student in students %}
     <tr>
-        <td>{{ entry.student.adm_no }}</td>
-        <td>{{ entry.student.first_name }}</td>
+        <td>{{ student.adm_no }}</td>
+        <td>{{ student.first_name }} {{ student.second_name }}</td>
+
+        {% set total_points = 0 %}
 
         {% for subject in subjects %}
             <td>
-                {% for r in entry.results %}
+                {% set mark = "" %}
+                {% for r in student.results %}
                     {% if r.subject_id == subject.id %}
-                        {{ r.marks }}
+                        {% set mark = r.marks %}
+                        {% set total_points = total_points + r.points %}
                     {% endif %}
                 {% endfor %}
+                {{ mark }}
             </td>
         {% endfor %}
 
-        <td><strong>{{ entry.total_points }}</strong></td>
-        <td><strong>{{ entry.final_grade }}</strong></td>
+        <td><strong>{{ total_points }}</strong></td>
+        <td>
+            {% if total_points >= 84 %}A
+            {% elif total_points >= 72 %}B
+            {% elif total_points >= 60 %}C
+            {% elif total_points >= 48 %}D
+            {% else %}E
+            {% endif %}
+        </td>
     </tr>
     {% endfor %}
 </table>
+
 
 
 
