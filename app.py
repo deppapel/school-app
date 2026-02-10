@@ -330,6 +330,7 @@ def results():
     student_data = []
 
     for student in students:
+        compulsory_subjects = Subject.query.filter_by(category="COMPULSORY").all()
 
         results = Result.query.filter_by(student_id=student.id).all()
 
@@ -348,7 +349,8 @@ def results():
 
     return render_template(
         "view_results.html",
-        student_data=student_data
+        student_data=student_data,
+        compulsory_subjects=compulsory_subjects
     )
 
 
