@@ -37,13 +37,14 @@
                 {% for sub in applied_subjects %} <th>{{ sub.subject_name }}</th> {% endfor %}
                 
                 <th>Total Points</th>
+                <th>Total Marks</th>
                 <th>Mean Grade</th>
             </tr>
         </thead>
         <tbody>
             {% for data in student_data %}
             <tr>
-                <td>{{data.rank}}</td>
+                <td>{{data.student.rank}}</td>
                 <td>{{ data.student.adm_no }}</td>
                 <td class="name-col">{{ data.student.first_name }} {{ data.student.second_name }}</td>
 
@@ -81,6 +82,7 @@
                 {% endfor %}
 
                 <td class="total-col">{{ data.total_points }}</td>
+                <td class="total-col">{{ data.total_marks}}</td>
                 <td class="total-col">{{ data.final_grade }}</td>
             </tr>
             {% endfor %}
