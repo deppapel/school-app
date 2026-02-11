@@ -326,23 +326,25 @@ def import_marks():
 def results():
 
     students = Student.query.all()
-
+    compulsory_subjects = Subject.query.filter_by(category="COMPULSORY").all()
+    arts_subjects = Subject.query.filter_by(category="ARTS").all
+    applied_subjects = Subject.query.filter_by(category="APPLIED").all
+    
     student_data = []
 
     for student in students:
-        compulsory_subjects = Subject.query.filter_by(category="COMPULSORY").all()
-        arts_subjects = Subject.query.filter_by(category="ARTS").all
-        applied_subjects = Subject.query.filter_by(category="APPLIED").all
+
         results = Result.query.filter_by(student_id=student.id).all()
 
+        results_dict = {result.subjectid: result for result in results}
+        
         total_points = sum(r.points for r in results)
         total_subjects = len(results)
-
         final_grade = student_final_grade(total_points)
 
         student_data.append({
             "student": student,
-            "results": results,
+            "results_dict": results_dict,
             "total_points": total_points,
             "total_subjects": total_subjects,
             "final_grade": final_grade 

@@ -1,43 +1,138 @@
-<h2>Results</h2>
-
-<table border="1" style="border-collapse: collapse; width:100%;">
-    <tr>
-        <th>Adm No</th>
-        <th>Name</th>
-
-        {% for subject in subjects %}
-            <th>{{ subject.subject_name }}</th>
-        {% endfor %}
-
-        <th>Total Points</th>
-        <th>Final Grade</th>
-    </tr>
-
-    {% for entry in student_data %}
-    <tr>
-        <td>{{ entry.student.adm_no }}</td>
-        <td>{{ entry.student.first_name }}</td>
-
-        {% for subject in subjects %}
-            <td>
-                {% set found = false %}
-                {% for r in entry.results %}
-                    {% if r.subject_id == subject.id %}
-                        {{ r.marks }}
-                        {% set found = true %}
-                    {% endif %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Results</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .student-name {
+            text-align: left;
+            font-weight: bold;
+        }
+        .category-header {
+            background-color: #2196F3;
+            color: white;
+        }
+        .total-column {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        .grade-column {
+            font-size: 16px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <h1>Student Results</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th rowspan="2">Student Name</th>
+                
+                <!-- Compulsory Subjects Header -->
+                <th colspan="{{ compulsory_subjects|length }}" class="category-header">
+                    COMPULSORY SUBJECTS
+                </th>
+                
+                <!-- Arts Subjects Header -->
+                <th colspan="{{ arts_subjects|length }}" class="category-header">
+                    ARTS SUBJECTS
+                </th>
+                
+                <!-- Applied Subjects Header -->
+                <th colspan="{{ applied_subjects|length }}" class="category-header">
+                    APPLIED SUBJECTS
+                </th>
+                
+                <th rowspan="2" class="total-column">Total Points</th>
+                <th rowspan="2" class="total-column">Subjects</th>
+                <th rowspan="2" class="grade-column">Grade</th>
+            </tr>
+            <tr>
+                <!-- Compulsory Subject Names -->
+                {% for subject in compulsory_subjects %}
+                <th>{{ subject.name }}</th>
                 {% endfor %}
-                {% if not found %}
-                    -
-                {% endif %}
-            </td>
-        {% endfor %}
-
-        <td><strong>{{ entry.total_points }}</strong></td>
-        <td><strong>{{ entry.final_grade }}</strong></td>
-    </tr>
-    {% endfor %}
-</table>
+                
+                <!-- Arts Subject Names -->
+                {% for subject in arts_subjects %}
+                <th>{{ subject.name }}</th>
+                {% endfor %}
+                
+                <!-- Applied Subject Names -->
+                {% for subject in applied_subjects %}
+                <th>{{ subject.name }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        
+        <tbody>
+            {% for data in student_data %}
+            <tr>
+                <td class="student-name">{{ data.student.name }}</td>
+                
+                <!-- Compulsory Subjects Points -->
+                {% for subject in compulsory_subjects %}
+                <td>
+                    {% if subject.id in data.results_dict %}
+                        {{ data.results_dict[subject.id].points }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                {% endfor %}
+                
+                <!-- Arts Subjects Points -->
+                {% for subject in arts_subjects %}
+                <td>
+                    {% if subject.id in data.results_dict %}
+                        {{ data.results_dict[subject.id].points }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                {% endfor %}
+                
+                <!-- Applied Subjects Points -->
+                {% for subject in applied_subjects %}
+                <td>
+                    {% if subject.id in data.results_dict %}
+                        {{ data.results_dict[subject.id].points }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                {% endfor %}
+                
+                <td class="total-column">{{ data.total_points }}</td>
+                <td class="total-column">{{ data.total_subjects }}</td>
+                <td class="grade-column">{{ data.final_grade }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
 
 
 
