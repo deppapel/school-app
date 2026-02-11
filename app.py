@@ -339,7 +339,7 @@ def results():
         results_dict = {result.subject_id: result for result in results}
 
         total_points = sum(r.points for r in results)
-        total_marks = sum(r.mark for r in results)
+        total_marks = sum(r.marks for r in results)
         final_grade = student_final_grade(total_points)
 
         student_data.append({
@@ -355,7 +355,7 @@ def results():
 
         for index, data in enumerate(student_data):
             data['rank'] = index + 1
-            
+
     return render_template(
         "view_results.html",
         student_data=student_data,
