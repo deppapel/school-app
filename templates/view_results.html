@@ -1,6 +1,6 @@
 <h2>Results</h2>
 
-<table border="1" style="border-collapse: collapse; width: 100%;">
+<table border="1" style="border-collapse: collapse; width:100%;">
     <tr>
         <th>Adm No</th>
         <th>Name</th>
@@ -10,41 +10,35 @@
         {% endfor %}
 
         <th>Total Points</th>
-        <th>Grade</th>
+        <th>Final Grade</th>
     </tr>
 
-    {% for student in students %}
+    {% for entry in student_data %}
     <tr>
-        <td>{{ student.adm_no }}</td>
-        <td>{{ student.first_name }} {{ student.second_name }}</td>
-
-        {% set total_points = 0 %}
+        <td>{{ entry.student.adm_no }}</td>
+        <td>{{ entry.student.first_name }}</td>
 
         {% for subject in subjects %}
             <td>
-                {% set mark = "" %}
-                {% for r in student.results %}
+                {% set found = false %}
+                {% for r in entry.results %}
                     {% if r.subject_id == subject.id %}
-                        {% set mark = r.marks %}
-                        {% set total_points = total_points + r.points %}
+                        {{ r.marks }}
+                        {% set found = true %}
                     {% endif %}
                 {% endfor %}
-                {{ mark }}
+                {% if not found %}
+                    -
+                {% endif %}
             </td>
         {% endfor %}
 
-        <td><strong>{{ total_points }}</strong></td>
-        <td>
-            {% if total_points >= 84 %}A
-            {% elif total_points >= 72 %}B
-            {% elif total_points >= 60 %}C
-            {% elif total_points >= 48 %}D
-            {% else %}E
-            {% endif %}
-        </td>
+        <td><strong>{{ entry.total_points }}</strong></td>
+        <td><strong>{{ entry.final_grade }}</strong></td>
     </tr>
     {% endfor %}
 </table>
+
 
 
 
