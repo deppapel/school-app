@@ -339,17 +339,23 @@ def results():
         results_dict = {result.subject_id: result for result in results}
 
         total_points = sum(r.points for r in results)
-        total_subjects = len(results)
+        total_marks = sum(r.mark for r in results)
         final_grade = student_final_grade(total_points)
 
         student_data.append({
             "student": student,
             "results_dict": results_dict,
             "total_points": total_points,
-            "total_subjects": total_subjects,
+            "total_marks": total_marks,
             "final_grade": final_grade 
         })
 
+        #Ranking
+        student_data.sort(key=lambda x: (x['total_points'], x['total_marks']), reverse=True)
+
+        for index, data in enumerate(student_data):
+            data['rank'] = index + 1
+            
     return render_template(
         "view_results.html",
         student_data=student_data,

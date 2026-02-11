@@ -23,6 +23,7 @@
     <table>
         <thead>
             <tr>
+                <th rowspan="=2">Rank</th>
                 <th rowspan="2">Adm No</th>
                 <th rowspan="2">Student Name</th>
                 <th colspan="{{ compulsory_subjects|length }}">Compulsory Subjects</th>
@@ -42,6 +43,7 @@
         <tbody>
             {% for data in student_data %}
             <tr>
+                <td>{{data.rank}}</td>
                 <td>{{ data.student.adm_no }}</td>
                 <td class="name-col">{{ data.student.first_name }} {{ data.student.second_name }}</td>
 
@@ -71,7 +73,7 @@
                 <td>
                     {% if sub.id in data.results_dict %}
                         <strong>{{ data.results_dict[sub.id].marks }}</strong>
-                        <small>{{ data.results_dict[sub.id].grade }}</small>
+                        <small>({{ data.results_dict[sub.id].grade }})</small>
                     {% else %}
                         <span style="color: #ccc;">n/a</span>
                     {% endif %}
