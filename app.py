@@ -336,7 +336,7 @@ def results():
 
         results = Result.query.filter_by(student_id=student.id).all()
 
-        results_dict = {result.subjectid: result for result in results}
+        results_dict = {result.subject_id: result for result in results}
 
         total_points = sum(r.points for r in results)
         total_subjects = len(results)
