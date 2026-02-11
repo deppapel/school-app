@@ -351,10 +351,10 @@ def results():
         })
 
         #Ranking
-        student_data.sort(key=lambda x: (x['total_points'], x['total_marks']), reverse=True)
+    student_data.sort(key=lambda x: (x['total_points'], x['total_marks']), reverse=True)
 
-        for index, data in enumerate(student_data):
-            data['rank'] = index + 1
+    for index, data in enumerate(student_data):
+        data['rank'] = index + 1
 
     return render_template(
         "view_results.html",
