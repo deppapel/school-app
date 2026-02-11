@@ -331,7 +331,8 @@ def results():
 
     for student in students:
         compulsory_subjects = Subject.query.filter_by(category="COMPULSORY").all()
-
+        arts_subjects = Subject.query.filter_by(category="ARTS").all
+        applied_subjects = Subject.query.filter_by(category="APPLIED").all
         results = Result.query.filter_by(student_id=student.id).all()
 
         total_points = sum(r.points for r in results)
@@ -350,7 +351,9 @@ def results():
     return render_template(
         "view_results.html",
         student_data=student_data,
-        compulsory_subjects=compulsory_subjects
+        compulsory_subjects=compulsory_subjects,
+        arts_subjects=arts_subjects,
+        applied_subjects=applied_subjects
     )
 
 
