@@ -36,7 +36,6 @@
                 {% for sub in applied_subjects %} <th>{{ sub.subject_name }}</th> {% endfor %}
                 
                 <th>Total Points</th>
-                <th>Subjects</th>
                 <th>Mean Grade</th>
             </tr>
         </thead>
@@ -49,8 +48,8 @@
                 {% for sub in compulsory_subjects %}
                 <td>
                     {% if sub.id in data.results_dict %}
-                        {{ data.results_dict[sub.id].grade }} <br>
-                        <small>({{ data.results_dict[sub.id].marks }})</small>
+                        <strong>{{ data.results_dict[sub.id].marks }}</strong> <br>
+                        <small>({{ data.results_dict[sub.id].grade }})</small>
                     {% else %}
                         -
                     {% endif %}
@@ -60,7 +59,8 @@
                 {% for sub in arts_subjects %}
                 <td>
                     {% if sub.id in data.results_dict %}
-                        <strong>{{ data.results_dict[sub.id].grade }}</strong>
+                        <strong>{{ data.results_dict[sub.id].marks }}</strong>
+                        <small>({{ data.results_dict[sub.id].grade }})</small>
                     {% else %}
                         <span style="color: #ccc;">n/a</span>
                     {% endif %}
@@ -70,7 +70,8 @@
                 {% for sub in applied_subjects %}
                 <td>
                     {% if sub.id in data.results_dict %}
-                        <strong>{{ data.results_dict[sub.id].grade }}</strong>
+                        <strong>{{ data.results_dict[sub.id].marks }}</strong>
+                        <small>{{ data.results_dict[sub.id].grade }}</small>
                     {% else %}
                         <span style="color: #ccc;">n/a</span>
                     {% endif %}
@@ -78,7 +79,6 @@
                 {% endfor %}
 
                 <td class="total-col">{{ data.total_points }}</td>
-                <td>{{ data.total_subjects }}</td>
                 <td class="total-col">{{ data.final_grade }}</td>
             </tr>
             {% endfor %}
