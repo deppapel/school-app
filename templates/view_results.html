@@ -1,136 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Student Results</title>
+    <meta charset="UTF-8">
+    <title>Student Results Analysis</title>
     <style>
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin: 20px 0;
-            font-size: 14px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: center;
-        }
-        th {
-            background-color: #4CAF50;
-            color: white;
-            font-weight: bold;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        .student-name {
-            text-align: left;
-            font-weight: bold;
-        }
-        .category-header {
-            background-color: #2196F3;
-            color: white;
-        }
-        .total-column {
-            background-color: #f0f0f0;
-            font-weight: bold;
-        }
-        .grade-column {
-            font-size: 16px;
-            font-weight: bold;
-            color: #4CAF50;
-        }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f4f4f4; }
+        .student-name { text-align: left; font-weight: bold; }
+        .summary-cell { background-color: #fafafa; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h1>Student Results</h1>
-    
+
+    <h2>Academic Performance Report</h2>
+
     <table>
         <thead>
             <tr>
                 <th rowspan="2">Student Name</th>
-                
-                <!-- Compulsory Subjects Header -->
-                <th colspan="{{ compulsory_subjects|length }}" class="category-header">
-                    COMPULSORY SUBJECTS
-                </th>
-                
-                <!-- Arts Subjects Header -->
-                <th colspan="{{ arts_subjects|length }}" class="category-header">
-                    ARTS SUBJECTS
-                </th>
-                
-                <!-- Applied Subjects Header -->
-                <th colspan="{{ applied_subjects|length }}" class="category-header">
-                    APPLIED SUBJECTS
-                </th>
-                
-                <th rowspan="2" class="total-column">Total Points</th>
-                <th rowspan="2" class="total-column">Subjects</th>
-                <th rowspan="2" class="grade-column">Grade</th>
+                <th colspan="{{ compulsory_subjects|length }}">Compulsory</th>
+                <th colspan="{{ arts_subjects|length }}">Arts</th>
+                <th colspan="{{ applied_subjects|length }}">Applied</th>
+                <th colspan="3">Summary</th>
             </tr>
             <tr>
-                <!-- Compulsory Subject Names -->
-                {% for subject in compulsory_subjects %}
-                <th>{{ subject.name }}</th>
-                {% endfor %}
+                {% for sub in compulsory_subjects %} <th>{{ sub.name }}</th> {% endfor %}
+                {% for sub in arts_subjects %} <th>{{ sub.name }}</th> {% endfor %}
+                {% for sub in applied_subjects %} <th>{{ sub.name }}</th> {% endfor %}
                 
-                <!-- Arts Subject Names -->
-                {% for subject in arts_subjects %}
-                <th>{{ subject.name }}</th>
-                {% endfor %}
-                
-                <!-- Applied Subject Names -->
-                {% for subject in applied_subjects %}
-                <th>{{ subject.name }}</th>
-                {% endfor %}
+                <th>Total Pts</th>
+                <th>Count</th>
+                <th>Grade</th>
             </tr>
         </thead>
-        
         <tbody>
-            {% for data in student_data %}
+            {% for entry in student_data %}
             <tr>
-                <td class="student-name">{{ data.student.name }}</td>
-                
-                <!-- Compulsory Subjects Points -->
-                {% for subject in compulsory_subjects %}
-                <td>
-                    {% if subject.id in data.results_dict %}
-                        {{ data.results_dict[subject.id].points }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
+                <td class="student-name">{{ entry.student.name }}</td>
+
+                {# 1. Compulsory Subjects #}
+                {% for sub in compulsory_subjects %}
+                    <td>{{ entry.results_dict[sub.id].grade if sub.id in entry.results_dict else '-' }}</td>
                 {% endfor %}
-                
-                <!-- Arts Subjects Points -->
-                {% for subject in arts_subjects %}
-                <td>
-                    {% if subject.id in data.results_dict %}
-                        {{ data.results_dict[subject.id].points }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
+
+                {# 2. Arts Subjects #}
+                {% for sub in arts_subjects %}
+                    <td>{{ entry.results_dict[sub.id].grade if sub.id in entry.results_dict else '-' }}</td>
                 {% endfor %}
-                
-                <!-- Applied Subjects Points -->
-                {% for subject in applied_subjects %}
-                <td>
-                    {% if subject.id in data.results_dict %}
-                        {{ data.results_dict[subject.id].points }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
+
+                {# 3. Applied Subjects #}
+                {% for sub in applied_subjects %}
+                    <td>{{ entry.results_dict[sub.id].grade if sub.id in entry.results_dict else '-' }}</td>
                 {% endfor %}
-                
-                <td class="total-column">{{ data.total_points }}</td>
-                <td class="total-column">{{ data.total_subjects }}</td>
-                <td class="grade-column">{{ data.final_grade }}</td>
+
+                {# Summary Totals #}
+                <td class="summary-cell">{{ entry.total_points }}</td>
+                <td class="summary-cell">{{ entry.total_subjects }}</td>
+                <td class="summary-cell"><strong>{{ entry.final_grade }}</strong></td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
 </body>
 </html>
 
