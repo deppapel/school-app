@@ -19,7 +19,7 @@
             <li><a href="/import_marks" style="text-decoration: none;">Upload Marks Excel</a><br></li>
         {% endif %}    
 
-        { % if current_user.role == 'GUEST' %}
+        {% if current_user.role == 'GUEST' %}
             <a href="/my_report_card">View My Report Card</a>
         {% endif %}
 
