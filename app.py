@@ -159,28 +159,33 @@ def add_subject():
 # ---------------- ADD MARKS (MANUAL) ----------------
 @app.route("/add_marks", methods=["GET", "POST"])
 def add_marks():
-    students = Student.query.all()
-    subjects = Subject.query.all()
+    student = Student.query.all()
+    subject = Subject.query.all()
     if request.method == "POST":
         try:
             student_id = request.form["student"]
             subject_id = request.form["subject"]
             mark = float(request.form["marks"])
+
+            student = Student.query.get(student_id)
+            subject = Subject.query.get(subject_id)
+
             existing = Result.query.filter_by(student_id=student_id, subject_id=subject_id).first()
 
-            save_or_update_result(students, subjects, mark)
+            save_or_update_result(student, subject, mark)
             db.session.commit()
+
             if existing:
-                flash(f"Marks updated for {students.first_name} in {subjects.subject_name}")   
+                flash(f"Marks updated for {student.first_name} in {subject.subject_name}")   
             else:
-                flash(f"marks added for {students.first_name} in {subjects.subject_name}")             
+                flash(f"marks added for {student.first_name} in {subject.subject_name}")             
             return redirect("/add_marks")
 
         except Exception as e:
             db.session.rollback()
             flash(f"Error adding marks: {str(e)}", "error")
 
-    return render_template("add_marks.html", students=students, subjects=subjects)
+    return render_template("add_marks.html", students=student, subjects=subject)
 
 
 # ---------------- DOWNLOAD EXCEL TEMPLATE ----------------
