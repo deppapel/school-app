@@ -1,6 +1,16 @@
 from flask_sqlalchemy import SQLAlchemy
-
+from flask_login import UserMixin
 db = SQLAlchemy()
+
+class User(db.Model, UserMixin):
+    __tablename__ = "user"
+    id = db.Column(db.Integer, Primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+    role = db.Column(db.String(20), default="GUEST")
+
+    def __repr__(self):
+        return f"<User {self.username} - {self.role}>"
 
 
 class Student(db.Model):

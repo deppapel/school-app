@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Report Card - {{ student.first_name }}</title>
+    <style>
+        body { font-family: 'Courier New', Courier, monospace; padding: 40px; background-color: #f4f4f4; }
+        .report-box { max-width: 800px; margin: auto; background: white; padding: 30px; border: 2px solid #333; }
+        .header { text-align: center; border-bottom: 2px solid #333; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #999; padding: 10px; text-align: left; }
+        th { background-color: #eee; }
+        .total-section { font-weight: bold; font-size: 1.2em; margin-top: 20px; }
+        .stamp { margin-top: 50px; text-align: right; font-style: italic; color: #555; }
+    </style>
+</head>
+<body>
+
+<div class="report-box">
+    <div class="header">
+        <h1>OFFICIAL STUDENT REPORT CARD</h1>
+        <p><strong>Name:</strong> {{ student.first_name }} {{ student.second_name }}</p>
+        <p><strong>Admission No:</strong> {{ student.adm_no }}</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Marks (%)</th>
+                <th>Grade</th>
+                <th>Points</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for res in results %}
+            <tr>
+                <td>{{ res.subject.subject_name }}</td>
+                <td>{{ res.marks }}</td>
+                <td>{{ res.grade }}</td>
+                <td>{{ res.points }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="total-section">
+        <p>Total Marks: {{ results|sum(attribute='marks') }}</p>
+        <p>Total Points: {{ results|sum(attribute='points') }}</p>
+        <p>Final Mean Grade: 
+            {% set total_pts = results|sum(attribute='points') %}
+            {# We use the same logic here or pass final_grade from the route #}
+            <strong>{{ final_grade }}</strong>
+        </p>
+    </div>
+
+    <div class="stamp">
+        <p>Generated on: 12th February 2026</p>
+        <p>School Principal's Signature: _________________</p>
+    </div>
+</div>
+
+<p style="text-align: center;"><a href="/">Back to Dashboard</a></p>
+
+</body>
+</html>

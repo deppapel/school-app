@@ -1,14 +1,23 @@
 from flask import Flask, render_template, request, redirect, flash, send_file
 from config import Config
-from models import db, Student, Subject, Result
+from models import db, Student, Subject, Result, User
 import pandas as pd
 import tempfile
+from flask_login import LoginManager, login_required, current_user, login_user, logout_user
 
 app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
 
 app.secret_key = "super-secret-key"  # Required for flash messages
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 # ---------------- SYSTEM SUBJECTS ----------------
 SYSTEM_SUBJECTS = [
@@ -94,6 +103,36 @@ def save_or_update_result(student, subject, mark):
             Result(student_id=student.id, subject_id=subject.id, marks=mark, grade=grade, points=points)
         )
 
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        # 1. Admin Login
+        if username == "admin" and password == "school123":
+            user = User.query.filter_by(username="admin").first()
+            if not user:
+                # Seed admin user if not exists
+                user = User(username="admin", password="school123", role="ADMIN")
+                db.session.add(user)
+                db.session.commit()
+            login_user(user)
+            return redirect("/")
+
+        # 2. Guest Login (Student)
+        student = Student.query.filter_by(adm_no=username).first()
+        if student and password == "student":
+            user = User.query.filter_by(username=username).first()
+            if not user:
+                # Create a user record if it doesn't exist yet
+                user = User(username=username, password="student", role="GUEST")
+                db.session.add(user)
+                db.session.commit()
+            login_user(user)
+            return redirect("/results") # Send guests straight to the matrix
+            
+    return render_template("login.html")
 
 # ---------------- ROUTES ----------------
 @app.route("/")
@@ -158,7 +197,11 @@ def add_subject():
 
 # ---------------- ADD MARKS (MANUAL) ----------------
 @app.route("/add_marks", methods=["GET", "POST"])
-def add_marks():
+@login_required
+def update_marks():
+    if current_user.role != "ADMIN":
+        flash("Unauthorised! Only school admin can modify marks")
+        return redirect("/")
     student = Student.query.all()
     subject = Subject.query.all()
     if request.method == "POST":
@@ -179,13 +222,13 @@ def add_marks():
                 flash(f"Marks updated for {student.first_name} in {subject.subject_name}")   
             else:
                 flash(f"marks added for {student.first_name} in {subject.subject_name}")             
-            return redirect("/add_marks")
+            return redirect("/update_marks")
 
         except Exception as e:
             db.session.rollback()
             flash(f"Error adding marks: {str(e)}", "error")
 
-    return render_template("add_marks.html", students=student, subjects=subject)
+    return render_template("update_marks.html", students=student, subjects=subject)
 
 
 # ---------------- DOWNLOAD EXCEL TEMPLATE ----------------
@@ -373,7 +416,27 @@ def results():
         applied_subjects=applied_subjects
     )
 
+@app.route("/my_report_card")
+@login_required
+def my_report_card():
 
+    student = Student.query.filter_by(adm_no=current_user.username).first()
+    if not student:
+        return "Student record not found", 404
+    
+    results = Result.query.filter_by(student_id=student.id).all()
+
+    total_points = sum(r.points for r in results)
+    final_grade = student_final_grade(total_points)
+
+    return render_template("personal_report.html", student=student, results=results, final_grade=final_grade)
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    flash("You have been logged out.")
+    return redirect("/login")
 
 if __name__ == "__main__":
     app.run(debug=True)
