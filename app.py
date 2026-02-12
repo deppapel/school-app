@@ -160,6 +160,7 @@ def add_subject():
 @app.route("/add_marks", methods=["GET", "POST"])
 def add_marks():
     students = Student.query.all()
+    subjects = Subject.query.all()
     if request.method == "POST":
         try:
             student_id = request.form["student"]
@@ -176,7 +177,7 @@ def add_marks():
             db.session.rollback()
             flash(f"Error adding marks: {str(e)}", "error")
 
-    return render_template("add_marks.html", students=students)
+    return render_template("add_marks.html", students=students, subjects=subjects)
 
 
 # ---------------- DOWNLOAD EXCEL TEMPLATE ----------------
