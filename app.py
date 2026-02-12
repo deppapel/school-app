@@ -167,12 +167,15 @@ def add_marks():
             subject_id = request.form["subject"]
             mark = float(request.form["marks"])
             existing = Result.query.filter_by(student_id=student_id, subject_id=subject_id).first()
-            if existing:
-                flash("Marks already entered for this subject", "error")
-                return redirect("/add_marks")
-            save_or_update_result(Student.query.get(student_id), Subject.query.get(subject_id), mark)
+
+            save_or_update_result(students, subjects, mark)
             db.session.commit()
-            flash("Marks added successfully!", "success")
+            if existing:
+                flash(f"Marks updated for {students.first_name} in {subjects.subject_name}")   
+            else:
+                flash(f"marks added for {students.first_name} in {subjects.subject_name}")             
+            return redirect("/add_marks")
+
         except Exception as e:
             db.session.rollback()
             flash(f"Error adding marks: {str(e)}", "error")
