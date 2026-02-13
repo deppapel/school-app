@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; background: #f0f2f5; }
+        
+        /* Sidebar Styling */
+        .sidebar { width: 280px; background: #1a2a40; color: white; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; background: #00d285; font-weight: bold; font-size: 1.2em; }
+        .menu-section { padding: 20px 10px 10px 20px; color: #5bc0de; font-size: 0.8em; text-transform: uppercase; }
+        .nav-item { padding: 15px 20px; color: #d1d5db; text-decoration: none; display: flex; align-items: center; transition: 0.3s; }
+        .nav-item:hover { background: #2d3e50; color: white; }
+        .nav-item i { margin-right: 15px; width: 20px; }
+
+        /* Main Content Styling */
+        .main-content { flex-grow: 1; overflow-y: auto; }
+        .top-bar { height: 60px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; border-bottom: 1px solid #ddd; }
+        .profile-card { margin: 30px; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; }
+        .card-header { background: #5cb85c; color: white; padding: 15px 20px; font-size: 1.1em; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 30px; }
+        .info-item label { display: block; font-weight: bold; color: #333; margin-bottom: 5px; }
+        .info-item span { color: #666; font-size: 1.1em; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header"><i class="fa fa-bars"></i> MENU</div>
+        
+        <div class="menu-section">Dashboard</div>
+        <a href="/dashboard" class="nav-item"><i class="fa fa-user"></i> Personal Profile</a>
+
+        <div class="menu-section">Academics</div>
+        <a href="/results" class="nav-item"><i class="fa fa-list-check"></i> Performance Matrix</a>
+        <a href="/my_report_card" class="nav-item"><i class="fa fa-file-invoice"></i> Official Report Card</a>
+
+        <div class="menu-section">Account</div>
+        <a href="/logout" class="nav-item"><i class="fa fa-right-from-bracket"></i> Logout</a>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <span>Welcome, <strong>{{ student.first_name }}</strong></span>
+            <img src="https://via.placeholder.com/40" style="border-radius: 50%; margin-left: 15px;">
+        </div>
+
+        <div class="profile-card">
+            <div class="card-header">Personal Information</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Registration No</label>
+                    <span>{{ student.adm_no }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Full Name</label>
+                    <span>{{ student.first_name }} {{ student.second_name }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Gender</label>
+                    <span>Male</span> </div>
+                <div class="info-item">
+                    <label>Status</label>
+                    <span style="color: green;">Active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
