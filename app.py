@@ -196,13 +196,13 @@ def add_subject():
     return render_template("add_subject.html")
 
 
-# ---------------- ADD MARKS (MANUAL) ----------------
-@app.route("/add_marks", methods=["GET", "POST"])
+# ---------------- UPDATE MARKS (MANUAL) ----------------
+@app.route("/update_marks", methods=["GET", "POST"])
 @login_required
 def update_marks():
     if current_user.role != "ADMIN":
         flash("Unauthorised! Only school admin can modify marks")
-        return redirect("/")
+        return redirect("login.html")
     student = Student.query.all()
     subject = Subject.query.all()
     if request.method == "POST":
@@ -436,7 +436,6 @@ def my_report_card():
 @login_required
 def logout():
     logout_user()
-    flash("You have been logged out.")
     return redirect("/login")
 
 if __name__ == "__main__":
