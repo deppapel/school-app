@@ -130,7 +130,7 @@ def login():
                 db.session.add(user)
                 db.session.commit()
             login_user(user)
-            return redirect("student_dashboard.html") # Send guests straight to the matrix
+            return redirect("/dashboard") # Send guests straight to the matrix
             
     return render_template("login.html")
 
@@ -141,7 +141,7 @@ def student_dashboard():
     student = Student.query.filter_by(username=current_user.username).first()
     if not student:
         flash("Student profile not found.")
-        return redirect("login.html")
+        return redirect("/login")
         
     return render_template("student_dashboard.html", student=student)
 
