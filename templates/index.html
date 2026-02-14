@@ -1,29 +1,195 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Management System</title>
+    <title>Admin Dashboard | SMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --navy: #1a2a40;
+            --emerald: #00d285;
+            --light-bg: #f4f7f6;
+            --white: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: var(--navy);
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 25px;
+            background-color: var(--emerald);
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .nav-item {
+            padding: 15px 25px;
+            color: #d1d5db;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: #2d3e50;
+            color: white;
+            border-left: 4px solid var(--emerald);
+        }
+
+        .nav-item i {
+            margin-right: 15px;
+            width: 20px;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .top-bar {
+            background: var(--white);
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .container {
+            padding: 40px;
+        }
+
+        .welcome-text h2 {
+            margin: 0;
+            color: var(--navy);
+        }
+
+        /* Grid Layout for Admin Actions */
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .action-card {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--navy);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .action-card i {
+            font-size: 2.5rem;
+            color: var(--emerald);
+            margin-bottom: 15px;
+        }
+
+        .action-card span {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .logout-btn {
+            background: #ff4d4d;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <h3>Welcome, {{current_user.username}}</h3>
-    
-        
-            <li><a href="/add_student" style="text-decoration: none;">Admit student</a></li>
-            <li><a href="/add_subject" style="text-decoration: none;">Assign subject</a></li>
-            <li><a href="/update_marks" style="text-decoration: none;">Update marks</a></li>
-            <li><a href="/download_marks_template" style="text-decoration: none;">Download Marks Excel</a><br></li>
-            <li><a href="/import_marks" style="text-decoration: none;">Upload Marks Excel</a><br></li>
-            <li><a href="/results" style="text-decoration: none;">View results</a></li>
 
+    <div class="sidebar">
+        <div class="sidebar-header">ADMIN PANEL</div>
+        <a href="/" class="nav-item"><i class="fa fa-home"></i> Dashboard</a>
+        <a href="/results" class="nav-item"><i class="fa fa-chart-line"></i> View Results</a>
+        <a href="/add_student" class="nav-item"><i class="fa fa-user-plus"></i> Admit Student</a>
+        <a href="/update_marks" class="nav-item"><i class="fa fa-edit"></i> Update Marks</a>
+        <div style="margin-top: auto;">
+            <a href="/logout" class="nav-item"><i class="fa fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
 
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="welcome-text">
+                <h2>Welcome, {{ current_user.username }}</h2>
+            </div>
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
 
-             <a href="/logout">Logout</a>
+        <div class="container">
+            <h3>Quick Management</h3>
+            <div class="admin-grid">
+                
+                <a href="/results" class="action-card">
+                    <i class="fa fa-table"></i>
+                    <span>View Performance Matrix</span>
+                </a>
 
+                <a href="/add_student" class="action-card">
+                    <i class="fa fa-user-graduate"></i>
+                    <span>Admit New Student</span>
+                </a>
 
+                <a href="/add_subject" class="action-card">
+                    <i class="fa fa-book"></i>
+                    <span>Assign Subject</span>
+                </a>
 
-  
+                <a href="/update_marks" class="action-card">
+                    <i class="fa fa-pen-to-square"></i>
+                    <span>Update Marks</span>
+                </a>
+
+                <a href="/download_marks_template" class="action-card">
+                    <i class="fa fa-file-excel"></i>
+                    <span>Download Excel Template</span>
+                </a>
+
+                <a href="/import_marks" class="action-card">
+                    <i class="fa fa-cloud-upload-alt"></i>
+                    <span>Upload Marks Excel</span>
+                </a>
+
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
 
