@@ -4,6 +4,7 @@ from models import db, Student, Subject, Result, User
 import pandas as pd
 import tempfile
 from flask_login import LoginManager, login_required, current_user, login_user, logout_user
+import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -47,11 +48,6 @@ def seed_subjects():
         if not exists:
             db.session.add(Subject(subject_name=name, category=category))
     db.session.commit()
-
-
-with app.app_context():
-    db.create_all()
-    seed_subjects()
 
 
 # ---------------- HELPER FUNCTIONS ----------------
@@ -449,9 +445,15 @@ def logout():
     logout_user()
     return redirect("/login")
 
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    with app.app_context():
+        db.create_all()
+        if not Subject.query.first():
+            seed_subjects()
 
-
+    port = int(os.environ.get("PORT", 5000))
+    
+    app.run(host='0.0.0.0', port=port, debug=True)
 
 
