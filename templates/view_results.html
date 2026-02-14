@@ -18,7 +18,13 @@
 <body>
 
     <h2>Student Performance Matrix</h2>
-    <a href="/">← Back to Dashboard</a>
+    <div class="navigation-links">
+        {% if current_user.role == 'ADMIN' %}
+        <a href="/" class="btn-back">← Back to Admin Control Center</a>
+        {% elif current_user.role == 'GUEST' %}
+        <a href="/dashboard" class="btn-back">← Back to My Student Portal</a>
+        {% endif %}
+    </div>
 
     <table>
         <thead>

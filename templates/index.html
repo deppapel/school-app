@@ -9,21 +9,17 @@
 <body>
     <h3>Welcome, {{current_user.username}}</h3>
     
-        <li><a href="/results" style="text-decoration: none;">View results</a></li>
-        {% if current_user.role == 'ADMIN' %}
-            <hr>
-            <li><a href="/add_student" style="text-decoration: none;">Add student</a></li>
-            <li><a href="/add_subject" style="text-decoration: none;">Add subject</a></li>
+        
+            <li><a href="/add_student" style="text-decoration: none;">Admit student</a></li>
+            <li><a href="/add_subject" style="text-decoration: none;">Assign subject</a></li>
             <li><a href="/update_marks" style="text-decoration: none;">Update marks</a></li>
             <li><a href="/download_marks_template" style="text-decoration: none;">Download Marks Excel</a><br></li>
             <li><a href="/import_marks" style="text-decoration: none;">Upload Marks Excel</a><br></li>
-        {% endif %}    
+            <li><a href="/results" style="text-decoration: none;">View results</a></li>
 
-        {% if current_user.role == 'GUEST' %}
-            <a href="/my_report_card">View My Report Card</a>
-        {% endif %}
 
-        <a href="/logout">Logout</a>
+
+             <a href="/logout">Logout</a>
 
 
 
