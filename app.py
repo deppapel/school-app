@@ -138,7 +138,7 @@ def login():
 @login_required
 def student_dashboard():
     # Find the student record linked to the logged-in user
-    student = Student.query.filter_by(username=current_user.username).first()
+    student = Student.query.filter_by(adm_no=current_user.username).first()
     if not student:
         flash("Student profile not found.")
         return redirect("/login")
