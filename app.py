@@ -130,7 +130,7 @@ def login():
                 db.session.add(user)
                 db.session.commit()
             login_user(user)
-            return redirect("/dashboard") # Send guests straight to the matrix
+        return redirect("/dashboard") # Send guests straight to the matrix
             
     return render_template("login.html")
 
@@ -213,7 +213,7 @@ def add_subject():
 def update_marks():
     if current_user.role != "ADMIN":
         flash("Unauthorised! Only school admin can modify marks")
-        return redirect("login.html")
+        return redirect("/login")
     student = Student.query.all()
     subject = Subject.query.all()
     if request.method == "POST":
