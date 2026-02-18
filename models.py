@@ -34,13 +34,16 @@ class Student(db.Model):
     # --- THE BRAINS: Calculated Property ---
     @property
     def calculated_current_form(self):
+       try: 
         # Fetches the master year from settings and does the math
-        settings = SystemSettings.query.first()
+        settings = SystemSettings.query.get(1)
         if not settings:
             return self.entry_form
         years_passed = settings.current_academic_year - self.admission_year
-        current_form = self.entry_form + years_passed
-        return current_form
+
+        return self.entry_form + years_passed
+       except:
+           return self.entry_form
 
     # Optional subjects
     arts_subject_id = db.Column(db.Integer, db.ForeignKey("subject.id"), nullable=False)
