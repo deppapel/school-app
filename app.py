@@ -173,7 +173,13 @@ def student_dashboard():
 @app.route("/")
 @login_required
 def index():
-    return render_template("index.html")
+    if current_user.role != "ADMIN":
+        return redirect("/dashboard")
+
+    # Fetch settings using your helper function
+    settings = get_settings()
+
+    return render_template("index.html", settings=settings)
 
 
 # ---------------- ADD STUDENT ----------------
