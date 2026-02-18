@@ -436,33 +436,51 @@ def import_marks():
 def results():
     settings = get_settings()
     
-    # 1. GET SEARCH PARAMETERS (or use defaults from SystemSettings)
+    # 1. GET SEARCH PARAMETERS
     sel_year = request.args.get('year', settings.current_academic_year, type=int)
     sel_term = request.args.get('term', settings.current_term, type=int)
-
     sel_form = request.args.get('form', type=int)
 
-    if current_user.role == 'STUDENT':
+    # --- HISTORICAL FORM CALCULATION ---
+    if current_user.role == 'GUEST' or current_user.role == 'STUDENT':
         student_rec = Student.query.filter_by(adm_no=current_user.username).first()
         if student_rec:
-            sel_form = student_rec.calculated_current_form
+            # If the student is searching for a past year, 
+            # calculate what form they were in back then.
+            # Example: Current Year (2026) Form 4 - (2026 - 2023) = Form 1.
+            year_diff = settings.current_academic_year - sel_year
+            calculated_historic_form = student_rec.calculated_current_form - year_diff
+            
+            # Lock the search to that historic form
+            sel_form = calculated_historic_form
+            
+            # Safety check: If the calculation goes below 1 (before they started school)
+            # or they search for the future, we cap it or handle it.
+            if sel_form < 1:
+                sel_form = 1 
         else:
-            flash("Student record not found.", "error")
-            return redirect("/")
+            flash("Student profile not found.")
+            return redirect("/login")
+    # --- END HISTORICAL LOCK ---
 
     # 2. FILTER STUDENTS
     all_students = Student.query.all()
     filtered_students = []
     
     for student in all_students:
-        # Check if the student's CALCULATED form matches the search
+        # We filter based on the student's calculated form FOR THE SEARCHED YEAR
+        # We need to calculate each student's form relative to the selected year
+        year_diff = settings.current_academic_year - sel_year
+        student_form_at_that_time = student.calculated_current_form - year_diff
+        
         if sel_form:
-            if student.calculated_current_form == sel_form:
+            if student_form_at_that_time == sel_form:
                 filtered_students.append(student)
         else:
+            # If no form is selected (Admin view 'All'), show everyone
             filtered_students.append(student)
 
-    # 3. BUILD THE DATA MATRIX
+    # 3. BUILD THE DATA MATRIX (Keep your existing code)
     compulsory_subjects = Subject.query.filter_by(category="COMPULSORY").all()
     arts_subjects = Subject.query.filter_by(category="ARTS").all()
     applied_subjects = Subject.query.filter_by(category="APPLIED").all()
@@ -470,21 +488,23 @@ def results():
     student_data = []
 
     for student in filtered_students:
-        # Fetch results ONLY for the selected Year, Term, and Form
+        # Find results matching the student, the selected year/term, 
+        # and the form they were in at that specific time.
+        year_diff = settings.current_academic_year - sel_year
+        form_at_time = student.calculated_current_form - year_diff
+
         results = Result.query.filter_by(
             student_id=student.id,
             academic_year=sel_year,
             term=sel_term,
-            form=student.calculated_current_form
+            form=form_at_time
         ).all()
 
         results_dict = {result.subject_id: result for result in results}
-
         total_points = sum(r.points for r in results)
         total_marks = sum(r.marks for r in results)
         final_grade = student_final_grade(total_points)
 
-        # Only add to matrix if they actually have results for this period
         if results:
             student_data.append({
                 "student": student,
@@ -494,7 +514,7 @@ def results():
                 "final_grade": final_grade 
             })
 
-    # 4. RANKING
+    # 4. RANKING (Keep your existing code)
     student_data.sort(key=lambda x: (x['total_points'], x['total_marks']), reverse=True)
     for index, data in enumerate(student_data):
         data['rank'] = index + 1

@@ -13,7 +13,6 @@
         .total-col { background-color: #e9ecef; font-weight: bold; }
         .grade-a { color: green; font-weight: bold; }
         .grade-e { color: red; }
-        /* Added button styling */
         .btn-back { text-decoration: none; color: #007bff; font-weight: bold; margin-bottom: 20px; display: inline-block; }
         .btn { padding: 8px 15px; border-radius: 4px; border: none; cursor: pointer; text-decoration: none; font-size: 0.9em; }
         .btn-primary { background-color: #007bff; color: white; }
@@ -33,8 +32,8 @@
     </div>
 
     <div class="filter-section" style="margin-bottom: 20px; padding: 15px; background: #f4f4f4; border-radius: 8px;">
-    {% if current_user.role == 'ADMIN' %}
         <form action="/results" method="GET" style="display: flex; gap: 15px; align-items: end;">
+            
             <div>
                 <label>Academic Year:</label><br>
                 <input type="number" name="year" value="{{ sel_year }}" class="form-control" style="width: 100px;">
@@ -49,6 +48,7 @@
                 </select>
             </div>
 
+            {% if current_user.role == 'ADMIN' %}
             <div>
                 <label>Form:</label><br>
                 <select name="form" class="form-control">
@@ -59,15 +59,16 @@
                     <option value="4" {% if sel_form == 4 %}selected{% endif %}>Form 4</option>
                 </select>
             </div>
+            {% else %}
+            <div>
+                <label>Viewing Form:</label><br>
+                <input type="text" value="{{ sel_form }}" class="form-control" style="width: 80px; background: #eee;" readonly>
+            </div>
+            {% endif %}
 
             <button type="submit" class="btn btn-primary">Search Matrix</button>
-            <a href="/results" class="btn btn-secondary">Reset to Current</a>
+            <a href="/results" class="btn btn-secondary">Reset</a>
         </form>
-    {% else %}
-        <div style="color: #343a40; font-weight: bold;">
-            <i class="fa fa-info-circle"></i> Viewing Results for Form {{ sel_form }} | Term {{ sel_term }} | Year {{ sel_year }}
-        </div>
-    {% endif %}
     </div>
 
     <table>
