@@ -11,6 +11,7 @@
             --emerald: #00d285;
             --light-bg: #f4f7f6;
             --white: #ffffff;
+            --danger: #ff4d4d;
         }
 
         body {
@@ -21,7 +22,7 @@
             height: 100vh;
         }
 
-        /* Sidebar Sidebar */
+        /* Sidebar */
         .sidebar {
             width: 260px;
             background-color: var(--navy);
@@ -48,7 +49,7 @@
             border-left: 4px solid transparent;
         }
 
-        .nav-item:hover {
+        .nav-item:hover, .nav-item.active {
             background-color: #2d3e50;
             color: white;
             border-left: 4px solid var(--emerald);
@@ -59,7 +60,7 @@
             width: 20px;
         }
 
-        /* Main Content Area */
+        /* Main Content */
         .main-content {
             flex-grow: 1;
             overflow-y: auto;
@@ -83,12 +84,33 @@
             color: var(--navy);
         }
 
-        /* Grid Layout for Admin Actions */
+        /* System Status Ribbon */
+        .system-status {
+            background: var(--navy);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .status-dot {
+            height: 8px;
+            width: 8px;
+            background-color: var(--emerald);
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* Admin Grid */
         .admin-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 25px;
-            margin-top: 30px;
+            margin-top: 20px;
         }
 
         .action-card {
@@ -103,6 +125,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            position: relative;
+            overflow: hidden;
         }
 
         .action-card:hover {
@@ -121,21 +145,31 @@
             font-size: 1.1rem;
         }
 
+        .action-card small {
+            margin-top: 8px;
+            color: #6c757d;
+        }
+
         .logout-btn {
-            background: #ff4d4d;
+            background: var(--danger);
             color: white;
             padding: 8px 20px;
             border-radius: 5px;
             text-decoration: none;
             font-weight: bold;
+            transition: opacity 0.3s;
         }
+
+        .logout-btn:hover { opacity: 0.9; }
+
     </style>
 </head>
 <body>
 
     <div class="sidebar">
         <div class="sidebar-header">ADMIN PANEL</div>
-        <a href="/" class="nav-item"><i class="fa fa-home"></i> Dashboard</a>
+        <a href="/" class="nav-item active"><i class="fa fa-home"></i> Dashboard</a>
+        <a href="/admin/settings" class="nav-item"><i class="fa fa-cog"></i> System Settings</a>
         <a href="/results" class="nav-item"><i class="fa fa-chart-line"></i> View Results</a>
         <a href="/add_student" class="nav-item"><i class="fa fa-user-plus"></i> Admit Student</a>
         <a href="/update_marks" class="nav-item"><i class="fa fa-edit"></i> Update Marks</a>
@@ -153,37 +187,49 @@
         </div>
 
         <div class="container">
+            <div class="system-status">
+                <span><span class="status-dot"></span> <strong>Current Session:</strong> {{ settings.current_academic_year }}</span>
+                <span>|</span>
+                <span><strong>Active Term:</strong> {{ settings.current_term }}</span>
+            </div>
+
             <h3>Quick Management</h3>
             <div class="admin-grid">
                 
+                <a href="/admin/settings" class="action-card" style="border-top: 4px solid var(--emerald);">
+                    <i class="fa fa-calendar-check"></i>
+                    <span>Academic Timeline</span>
+                    <small>Set Global Year & Term</small>
+                </a>
+
                 <a href="/results" class="action-card">
                     <i class="fa fa-table"></i>
-                    <span>View Performance Matrix</span>
+                    <span>Performance Matrix</span>
+                    <small>View & Filter Grades</small>
                 </a>
 
                 <a href="/add_student" class="action-card">
                     <i class="fa fa-user-graduate"></i>
                     <span>Admit New Student</span>
+                    <small>Assign Entry Year/Form</small>
                 </a>
 
                 <a href="/add_subject" class="action-card">
                     <i class="fa fa-book"></i>
                     <span>Assign Subject</span>
+                    <small>Manage Curriculum</small>
                 </a>
 
                 <a href="/update_marks" class="action-card">
                     <i class="fa fa-pen-to-square"></i>
                     <span>Update Marks</span>
-                </a>
-
-                <a href="/download_marks_template" class="action-card">
-                    <i class="fa fa-file-excel"></i>
-                    <span>Download Excel Template</span>
+                    <small>Manual Entry</small>
                 </a>
 
                 <a href="/import_marks" class="action-card">
                     <i class="fa fa-cloud-upload-alt"></i>
                     <span>Upload Marks Excel</span>
+                    <small>Bulk Data Import</small>
                 </a>
 
             </div>

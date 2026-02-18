@@ -1,10 +1,22 @@
-
 <h2>Add Student</h2>
 <form method="POST">
     <input type="text" name="adm_no" placeholder="ADM_NO" required>
     <input type="text" name="first_name" placeholder="First Name" required>
-    <input type="text" name="second_name" placeholder="Second Name" >
+    <input type="text" name="second_name" placeholder="Second Name">
 
+    <hr>
+    <label>Admission Year (Year they joined the school):</label>
+    <input type="number" name="admission_year" value="2026" required>
+
+    <label>Entry Form (Form level when they joined):</label>
+    <select name="entry_form" required>
+        <option value="1">Form 1</option>
+        <option value="2">Form 2</option>
+        <option value="3">Form 3</option>
+        <option value="4">Form 4</option>
+    </select>
+    
+    <hr>
     <label>Arts Subject</label>
     <select name="arts_subject" required>
       {% for subject in arts_subjects %}
@@ -19,7 +31,8 @@
       {% endfor %}  
     </select>
 
-    <button type="submit">Save</button>
+    <button type="submit">Save Student Record</button>
 </form>
+
 
 

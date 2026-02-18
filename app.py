@@ -1,14 +1,41 @@
 from flask import Flask, render_template, request, redirect, flash, send_file
 from config import Config
-from models import db, Student, Subject, Result, User
+from models import db, Student, Subject, Result, User, SystemSettings
 import pandas as pd
 import tempfile
 from flask_login import LoginManager, login_required, current_user, login_user, logout_user
 import os
 
+
+def get_settings():
+    settings = SystemSettings.query.first()
+    if not settings:
+        # Initial default if table is empty
+        settings = SystemSettings(current_academic_year=2026, current_term=1)
+        db.session.add(settings)
+        db.session.commit()
+    return settings
+
 app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
+
+@app.route("/admin/settings", methods=["GET", "POST"])
+@login_required
+def manage_settings():
+    if current_user.role != "ADMIN":
+        flash("Unauthorized access!")
+        return redirect("/")
+    
+    settings = get_settings()
+    if request.method == "POST":
+        settings.current_academic_year = int(request.form["year"])
+        settings.current_term = int(request.form["term"])
+        db.session.commit()
+        flash(f"System updated: {settings.current_academic_year} Term {settings.current_term}")
+        return redirect("/admin/settings")
+        
+    return render_template("manage_settings.html", settings=settings)
 
 app.secret_key = "super-secret-key"  # Required for flash messages
 
@@ -87,17 +114,18 @@ def student_final_grade(total_points):
     
 
 
-def save_or_update_result(student, subject, mark):
+def save_or_update_result(student, subject, mark, form_lvl, term_lvl, year_lvl):
     grade, points = grade_and_points(mark)
-    existing = Result.query.filter_by(student_id=student.id, subject_id=subject.id).first()
+    existing = Result.query.filter_by(student_id=student.id, subject_id=subject.id, form=form_lvl, term=term_lvl, academic_year=year_lvl).first()
     if existing:
         existing.marks = mark
         existing.grade = grade
         existing.points = points
     else:
         db.session.add(
-            Result(student_id=student.id, subject_id=subject.id, marks=mark, grade=grade, points=points)
+            Result(student_id=student.id, subject_id=subject.id, marks=mark, grade=grade, points=points, form=form_lvl, term=term_lvl, academic_year=year_lvl)
         )
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -159,6 +187,8 @@ def add_student():
             adm_no = request.form["adm_no"]
             first_name = request.form["first_name"]
             second_name = request.form["second_name"]
+            e_form = int(request.form["entry_form"])
+            adm_year = int(request.form["admission_year"])
             arts_id = request.form["arts_subject"]
             applied_id = request.form["applied_subject"]
 
@@ -170,6 +200,8 @@ def add_student():
                 adm_no=adm_no,
                 first_name=first_name,
                 second_name=second_name,
+                entry_form=e_form,
+                admission_year=adm_year,
                 arts_subject_id=arts_id,
                 applied_subject_id=applied_id
             )
@@ -281,6 +313,11 @@ def download_marks_template():
 # ---------------- UPLOAD EXCEL MARKS ----------------
 @app.route("/import_marks", methods=["GET", "POST"])
 def import_marks():
+
+    if current_user.role != "ADMIN":
+        flash("Unauthorized access!")
+        return redirect("/login")
+
     if request.method == "GET":
         return render_template("import_marks.html")
 
@@ -302,6 +339,10 @@ def import_marks():
         if "adm_no" not in df.columns:
             flash("Excel must contain an 'adm_no' column", "error")
             return redirect("/import_marks")
+        
+        settings = get_settings() 
+        curr_year = settings.current_academic_year
+        curr_term = settings.current_term
 
         compulsory_subjects = Subject.query.filter_by(category="COMPULSORY").all()
 
@@ -313,6 +354,8 @@ def import_marks():
             if not student:
                 flash(f"Student {adm_no} not found. Skipping.", "warning")
                 continue
+
+            student_form = student.calculated_current_form
 
             subject_count = 0
             total_points = 0
@@ -331,7 +374,7 @@ def import_marks():
                 except (ValueError, TypeError):
                     flash(f"Invalid mark {mark} for {subject.subject_name} for {adm_no}", "warning")
                     continue
-                save_or_update_result(student, subject, mark)
+                save_or_update_result(student, subject, mark, student_form, curr_term, curr_year)
                 subject_count += 1
                 total_points += grade_and_points(mark)[1]
 
@@ -341,7 +384,7 @@ def import_marks():
                 if not pd.isna(arts_mark):
                     try:
                         arts_mark = float(arts_mark)
-                        save_or_update_result(student, student.arts_subject, arts_mark)
+                        save_or_update_result(student, student.arts_subject, arts_mark, student_form, curr_term, curr_year)
                         subject_count += 1
                         total_points += grade_and_points(arts_mark)[1]
                     except (ValueError, TypeError):
@@ -353,7 +396,7 @@ def import_marks():
                 if not pd.isna(applied_mark):
                     try:
                         applied_mark = float(applied_mark)
-                        save_or_update_result(student, student.applied_subject, applied_mark)
+                        save_or_update_result(student, student.applied_subject, applied_mark, student_form, curr_term, curr_year)
                         subject_count += 1
                         total_points += grade_and_points(applied_mark)[1]
                     except (ValueError, TypeError):
@@ -383,18 +426,43 @@ def import_marks():
 
 # ---------------- VIEW RESULTS ----------------
 @app.route("/results")
+@login_required
 def results():
+    settings = get_settings()
+    
+    # 1. GET SEARCH PARAMETERS (or use defaults from SystemSettings)
+    sel_year = request.args.get('year', settings.current_academic_year, type=int)
+    sel_term = request.args.get('term', settings.current_term, type=int)
 
-    students = Student.query.all()
+    sel_form = request.args.get('form', type=int)
+
+    # 2. FILTER STUDENTS
+    all_students = Student.query.all()
+    filtered_students = []
+    
+    for student in all_students:
+        # Check if the student's CALCULATED form matches the search
+        if sel_form:
+            if student.calculated_current_form == sel_form:
+                filtered_students.append(student)
+        else:
+            filtered_students.append(student)
+
+    # 3. BUILD THE DATA MATRIX
     compulsory_subjects = Subject.query.filter_by(category="COMPULSORY").all()
     arts_subjects = Subject.query.filter_by(category="ARTS").all()
     applied_subjects = Subject.query.filter_by(category="APPLIED").all()
     
     student_data = []
 
-    for student in students:
-
-        results = Result.query.filter_by(student_id=student.id).all()
+    for student in filtered_students:
+        # Fetch results ONLY for the selected Year, Term, and Form
+        results = Result.query.filter_by(
+            student_id=student.id,
+            academic_year=sel_year,
+            term=sel_term,
+            form=student.calculated_current_form
+        ).all()
 
         results_dict = {result.subject_id: result for result in results}
 
@@ -402,17 +470,18 @@ def results():
         total_marks = sum(r.marks for r in results)
         final_grade = student_final_grade(total_points)
 
-        student_data.append({
-            "student": student,
-            "results_dict": results_dict,
-            "total_points": total_points,
-            "total_marks": total_marks,
-            "final_grade": final_grade 
-        })
+        # Only add to matrix if they actually have results for this period
+        if results:
+            student_data.append({
+                "student": student,
+                "results_dict": results_dict,
+                "total_points": total_points,
+                "total_marks": total_marks,
+                "final_grade": final_grade 
+            })
 
-        #Ranking
+    # 4. RANKING
     student_data.sort(key=lambda x: (x['total_points'], x['total_marks']), reverse=True)
-
     for index, data in enumerate(student_data):
         data['rank'] = index + 1
 
@@ -421,7 +490,10 @@ def results():
         student_data=student_data,
         compulsory_subjects=compulsory_subjects,
         arts_subjects=arts_subjects,
-        applied_subjects=applied_subjects
+        applied_subjects=applied_subjects,
+        sel_year=sel_year,
+        sel_term=sel_term,
+        sel_form=sel_form
     )
 
 @app.route("/my_report_card")
@@ -432,12 +504,18 @@ def my_report_card():
     if not student:
         return "Student record not found", 404
     
-    results = Result.query.filter_by(student_id=student.id).all()
+    settings = get_settings()
+    
+    # Get search params, defaulting to current system settings
+    sel_year = request.args.get('year', settings.current_academic_year, type=int)
+    sel_term = request.args.get('term', settings.current_term, type=int)
+
+    results = Result.query.filter_by(student_id=student.id, academic_year=sel_year, term=sel_term).all()
 
     total_points = sum(r.points for r in results)
     final_grade = student_final_grade(total_points)
 
-    return render_template("personal_report.html", student=student, results=results, final_grade=final_grade)
+    return render_template("personal_report.html", student=student, results=results, final_grade=final_grade, sel_year=sel_year, sel_term=sel_term)
 
 @app.route("/logout")
 @login_required
@@ -448,7 +526,7 @@ def logout():
 
 if __name__ == "__main__":
     with app.app_context():
-        db.create_all()
+        db.drop_all()
         if not Subject.query.first():
             seed_subjects()
 

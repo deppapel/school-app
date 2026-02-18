@@ -2,68 +2,121 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Student Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal | SMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; background: #f0f2f5; }
-        
-        /* Sidebar Styling */
-        .sidebar { width: 280px; background: #1a2a40; color: white; display: flex; flex-direction: column; }
-        .sidebar-header { padding: 20px; background: #00d285; font-weight: bold; font-size: 1.2em; }
-        .menu-section { padding: 20px 10px 10px 20px; color: #5bc0de; font-size: 0.8em; text-transform: uppercase; }
-        .nav-item { padding: 15px 20px; color: #d1d5db; text-decoration: none; display: flex; align-items: center; transition: 0.3s; }
-        .nav-item:hover { background: #2d3e50; color: white; }
-        .nav-item i { margin-right: 15px; width: 20px; }
+        :root {
+            --navy: #1a2a40;
+            --emerald: #00d285;
+            --light-bg: #f4f7f6;
+            --white: #ffffff;
+            --text-muted: #6c757d;
+        }
 
-        /* Main Content Styling */
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; height: 100vh; background: var(--light-bg); }
+        
+        /* Sidebar */
+        .sidebar { width: 280px; background: var(--navy); color: white; display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+        .sidebar-header { padding: 30px 20px; background: var(--emerald); font-weight: bold; font-size: 1.2em; letter-spacing: 1px; text-align: center; }
+        .menu-section { padding: 25px 25px 10px; color: var(--emerald); font-size: 0.75em; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
+        .nav-item { padding: 15px 25px; color: #d1d5db; text-decoration: none; display: flex; align-items: center; transition: 0.3s; border-left: 4px solid transparent; }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.05); color: white; border-left-color: var(--emerald); }
+        .nav-item i { margin-right: 15px; width: 20px; font-size: 1.1em; }
+
+        /* Main Content */
         .main-content { flex-grow: 1; overflow-y: auto; }
-        .top-bar { height: 60px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; border-bottom: 1px solid #ddd; }
-        .profile-card { margin: 30px; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; }
-        .card-header { background: #5cb85c; color: white; padding: 15px 20px; font-size: 1.1em; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 30px; }
-        .info-item label { display: block; font-weight: bold; color: #333; margin-bottom: 5px; }
-        .info-item span { color: #666; font-size: 1.1em; }
+        .top-bar { height: 70px; background: var(--white); display: flex; align-items: center; justify-content: flex-end; padding: 0 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        .user-info { display: flex; align-items: center; gap: 12px; color: var(--navy); font-weight: 500; }
+        
+        .container { padding: 40px; max-width: 1000px; margin: 0 auto; }
+        
+        .profile-card { background: var(--white); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow: hidden; }
+        .card-header { background: var(--navy); color: white; padding: 20px 30px; font-size: 1.2em; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Info Grid */
+        .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; padding: 40px; }
+        .info-item { border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .info-item label { display: block; font-weight: 600; color: var(--navy); font-size: 0.85em; text-transform: uppercase; margin-bottom: 8px; opacity: 0.7; }
+        .info-item span { color: #333; font-size: 1.1em; font-weight: 500; }
+
+        /* Smart Status Badges */
+        .status-badge { padding: 6px 16px; border-radius: 20px; font-size: 0.85em; font-weight: bold; }
+        .status-active { background: #e6f9f1; color: #00d285; }
+        .status-inactive { background: #fff0f0; color: #ff4d4d; }
+        
+        .form-highlight { color: var(--emerald); font-weight: bold; font-size: 1.2em; }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <div class="sidebar-header"><i class="fa fa-bars"></i> MENU</div>
+        <div class="sidebar-header">STUDENT PORTAL</div>
         
-        <div class="menu-section">Dashboard</div>
-        <a href="/dashboard" class="nav-item"><i class="fa fa-user"></i> Personal Profile</a>
+        <div class="menu-section">Personal</div>
+        <a href="/dashboard" class="nav-item active"><i class="fa fa-user-circle"></i> Profile Overview</a>
 
-        <div class="menu-section">Academics</div>
-        <a href="/results" class="nav-item"><i class="fa fa-list-check"></i> Performance Matrix</a>
-        <a href="/my_report_card" class="nav-item"><i class="fa fa-file-invoice"></i> Official Report Card</a>
+        <div class="menu-section">Academic Records</div>
+        <a href="/results" class="nav-item"><i class="fa fa-th-list"></i> Performance Matrix</a>
+        <a href="/my_report_card" class="nav-item"><i class="fa fa-file-signature"></i> Official Report Card</a>
 
-        <div class="menu-section">Account</div>
-        <a href="/logout" class="nav-item"><i class="fa fa-right-from-bracket"></i> Logout</a>
+        <div style="margin-top: auto;">
+            <a href="/logout" class="nav-item" style="color: #ff4d4d;"><i class="fa fa-power-off"></i> Sign Out</a>
+        </div>
     </div>
 
     <div class="main-content">
         <div class="top-bar">
-            <span>Welcome, <strong>{{ student.first_name }}</strong></span>
-            <img src="https://via.placeholder.com/40" style="border-radius: 50%; margin-left: 15px;">
+            <div class="user-info">
+                <span>Welcome back, <strong>{{ student.first_name }}</strong></span>
+                <div style="width: 40px; height: 40px; background: #eee; border-radius: 50%; display: grid; place-items: center;">
+                    <i class="fa fa-user" style="color: #ccc;"></i>
+                </div>
+            </div>
         </div>
 
-        <div class="profile-card">
-            <div class="card-header">Personal Information</div>
-            <div class="info-grid">
-                <div class="info-item">
-                    <label>Registration No</label>
-                    <span>{{ student.adm_no }}</span>
+        <div class="container">
+            <div class="profile-card">
+                <div class="card-header">
+                    <span>Academic Profile</span>
+                    {% if student.calculated_current_form <= 4 %}
+                    <span class="status-badge status-active">● ACTIVE STUDENT</span>
+                    {% else %}
+                    <span class="status-badge status-inactive">● ALUMNI / COMPLETED</span>
+                    {% endif %}
                 </div>
-                <div class="info-item">
-                    <label>Full Name</label>
-                    <span>{{ student.first_name }} {{ student.second_name }}</span>
-                </div>
-                <div class="info-item">
-                    <label>Gender</label>
-                    <span>Male</span> </div>
-                <div class="info-item">
-                    <label>Status</label>
-                    <span style="color: green;">Active</span>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Admission Number</label>
+                        <span>{{ student.adm_no }}</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Current Placement</label>
+                        <span class="form-highlight">
+                            {% if student.calculated_current_form <= 4 %}
+                                Form {{ student.calculated_current_form }}
+                            {% else %}
+                                Completed High School
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <label>Full Legal Name</label>
+                        <span>{{ student.first_name }} {{ student.second_name }}</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Year of Admission</label>
+                        <span>{{ student.admission_year }}</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Arts Choice</label>
+                        <span>{{ student.arts_subject.subject_name }}</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Applied Choice</label>
+                        <span>{{ student.applied_subject.subject_name }}</span>
+                    </div>
                 </div>
             </div>
         </div>

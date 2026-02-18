@@ -25,7 +25,38 @@
         <a href="/dashboard" class="btn-back">← Back to My Student Portal</a>
         {% endif %}
     </div>
+    <div class="filter-section" style="margin-bottom: 20px; padding: 15px; background: #f4f4f4; border-radius: 8px;">
+    <form action="/results" method="GET" style="display: flex; gap: 15px; align-items: end;">
+        
+        <div>
+            <label>Academic Year:</label><br>
+            <input type="number" name="year" value="{{ sel_year }}" class="form-control" style="width: 100px;">
+        </div>
 
+        <div>
+            <label>Term:</label><br>
+            <select name="term" class="form-control">
+                <option value="1" {% if sel_term == 1 %}selected{% endif %}>Term 1</option>
+                <option value="2" {% if sel_term == 2 %}selected{% endif %}>Term 2</option>
+                <option value="3" {% if sel_term == 3 %}selected{% endif %}>Term 3</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Form:</label><br>
+            <select name="form" class="form-control">
+                <option value="">All Forms</option>
+                <option value="1" {% if sel_form == 1 %}selected{% endif %}>Form 1</option>
+                <option value="2" {% if sel_form == 2 %}selected{% endif %}>Form 2</option>
+                <option value="3" {% if sel_form == 3 %}selected{% endif %}>Form 3</option>
+                <option value="4" {% if sel_form == 4 %}selected{% endif %}>Form 4</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Search Matrix</button>
+        <a href="/results" class="btn btn-secondary">Reset to Current</a>
+    </form>
+</div>
     <table>
         <thead>
             <tr>

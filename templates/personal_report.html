@@ -5,24 +5,59 @@
     <title>Report Card - {{ student.first_name }}</title>
     <style>
         body { font-family: 'Courier New', Courier, monospace; padding: 40px; background-color: #f4f4f4; }
-        .report-box { max-width: 800px; margin: auto; background: white; padding: 30px; border: 2px solid #333; }
+        .report-box { max-width: 800px; margin: auto; background: white; padding: 30px; border: 2px solid #333; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         .header { text-align: center; border-bottom: 2px solid #333; margin-bottom: 20px; }
+        
+        /* Filter Section - Hidden on Print */
+        .filter-section { 
+            max-width: 800px; margin: 0 auto 20px auto; 
+            background: #e9ecef; padding: 15px; 
+            border: 1px solid #ccc; border-radius: 4px;
+        }
+        .filter-section form { display: flex; gap: 10px; align-items: center; justify-content: center; }
+        .btn-view { background: #333; color: white; border: none; padding: 5px 15px; cursor: pointer; }
+
         table { width: 100%; border-collapse: collapse; margin: 20px 0; }
         th, td { border: 1px solid #999; padding: 10px; text-align: left; }
         th { background-color: #eee; }
-        .total-section { font-weight: bold; font-size: 1.2em; margin-top: 20px; }
+        .total-section { font-weight: bold; font-size: 1.2em; margin-top: 20px; border-top: 1px dashed #333; padding-top: 10px; }
         .stamp { margin-top: 50px; text-align: right; font-style: italic; color: #555; }
+        
+        .no-data-msg { text-align: center; padding: 40px; border: 1px dashed #999; color: #666; }
+
+        @media print {
+            .filter-section, .back-link { display: none; }
+            body { background-color: white; padding: 0; }
+            .report-box { border: 2px solid #333; box-shadow: none; }
+        }
     </style>
 </head>
 <body>
+
+<div class="filter-section">
+    <form method="GET" action="/my_report_card">
+        <label>Year:</label>
+        <input type="number" name="year" value="{{ sel_year }}" style="width: 70px;">
+        <label>Term:</label>
+        <select name="term">
+            <option value="1" {% if sel_term == 1 %}selected{% endif %}>1</option>
+            <option value="2" {% if sel_term == 2 %}selected{% endif %}>2</option>
+            <option value="3" {% if sel_term == 3 %}selected{% endif %}>3</option>
+        </select>
+        <button type="submit" class="btn-view">Filter Report</button>
+        <button type="button" class="btn-view" onclick="window.print()">Print PDF</button>
+    </form>
+</div>
 
 <div class="report-box">
     <div class="header">
         <h1>OFFICIAL STUDENT REPORT CARD</h1>
         <p><strong>Name:</strong> {{ student.first_name }} {{ student.second_name }}</p>
         <p><strong>Admission No:</strong> {{ student.adm_no }}</p>
+        <p><strong>Academic Period:</strong> {{ sel_year }} - Term {{ sel_term }}</p>
     </div>
 
+    {% if results %}
     <table>
         <thead>
             <tr>
@@ -47,20 +82,22 @@
     <div class="total-section">
         <p>Total Marks: {{ results|sum(attribute='marks') }}</p>
         <p>Total Points: {{ results|sum(attribute='points') }}</p>
-        <p>Final Mean Grade: 
-            {% set total_pts = results|sum(attribute='points') %}
-            {# We use the same logic here or pass final_grade from the route #}
-            <strong>{{ final_grade }}</strong>
-        </p>
+        <p>Final Mean Grade: <strong>{{ final_grade }}</strong></p>
     </div>
+    {% else %}
+    <div class="no-data-msg">
+        <p>RECORD NOT FOUND</p>
+        <p>No marks have been recorded for the selected period ({{ sel_year }} Term {{ sel_term }}).</p>
+    </div>
+    {% endif %}
 
     <div class="stamp">
-        <p>Generated on: 12th February 2026</p>
+        <p>Generated on: 18th February 2026</p>
         <p>School Principal's Signature: _________________</p>
     </div>
 </div>
 
-<p style="text-align: center;"><a href="/dashboard">Back to Dashboard</a></p>
+<p style="text-align: center;" class="back-link"><a href="/dashboard">Back to Dashboard</a></p>
 
 </body>
 </html>
