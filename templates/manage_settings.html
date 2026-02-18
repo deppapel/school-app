@@ -1,0 +1,16 @@
+<h2>System Settings</h2>
+<form method="POST">
+    <label>Current Academic Year:</label>
+    <input type="number" name="year" value="{{ settings.current_academic_year }}" required>
+    
+    <label>Current Term:</label>
+    <select name="term">
+        <option value="1" {% if settings.current_term == 1 %}selected{% endif %}>Term 1</option>
+        <option value="2" {% if settings.current_term == 2 %}selected{% endif %}>Term 2</option>
+        <option value="3" {% if settings.current_term == 3 %}selected{% endif %}>Term 3</option>
+    </select>
+    
+    <button type="submit">Update System Status</button>
+</form>
+<br>
+<a href="/">Back to Dashboard</a>
