@@ -244,6 +244,7 @@ def update_marks():
         return redirect("/login")
     student = Student.query.all()
     subject = Subject.query.all()
+    settings = get_settings()
     if request.method == "POST":
         try:
             student_id = request.form["student"]
@@ -255,7 +256,7 @@ def update_marks():
 
             existing = Result.query.filter_by(student_id=student_id, subject_id=subject_id).first()
 
-            save_or_update_result(student, subject, mark)
+            save_or_update_result(student, subject, mark, student.calculated_current_form, settings.current_term, settings.current_academic_year)
             db.session.commit()
 
             if existing:
@@ -526,7 +527,7 @@ def logout():
 
 if __name__ == "__main__":
     with app.app_context():
-        db.drop_all()
+        db.create_all()
         if not Subject.query.first():
             seed_subjects()
 
