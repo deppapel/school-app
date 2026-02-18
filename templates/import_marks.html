@@ -1,11 +1,22 @@
-<h2>Upload Marks Excel</h2>
+<div style="max-width: 600px; margin: 40px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: 'Segoe UI', sans-serif;">
+    <h2 style="color: #1a2a40; border-bottom: 2px solid #00d285; padding-bottom: 10px;">Upload Marks Excel</h2>
 
-<form method="POST" enctype="multipart/form-data">
-    <input type="file" name="file" accept=".xlsx" required>
-    <button type="submit">Upload Marks</button>
-</form>
+    <form method="POST" enctype="multipart/form-data">
+        <div style="margin-bottom: 20px;">
+            <input type="file" name="file" accept=".xlsx" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <button type="submit" style="width: 100%; background: #00d285; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">
+            Upload Marks
+        </button>
+    </form>
 
-<p>
-Excel columns must be:
-<b>adm_no| first_name| second_name | subject_name | marks</b>
-</p>
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+        <p style="color: #1a2a40; font-weight: bold;">Excel columns must be:</p>
+        <code style="background: #f4f7f6; padding: 10px; display: block; border-radius: 4px; color: #1a2a40; font-size: 0.9em;">
+            adm_no | student_name | form | year | term | English | Mathematics | Biology | Chemistry | Physics | Kiswahili | ARTS | APPLIED
+        </code>
+        <p style="font-size: 0.85em; color: #6c757d; margin-top: 10px;">
+            <i class="fa fa-info-circle"></i> Please use the template downloaded from the dashboard to ensure the <b>form</b>, <b>year</b>, and <b>term</b> columns are correct.
+        </p>
+    </div>
+</div>

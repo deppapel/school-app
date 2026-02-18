@@ -279,32 +279,27 @@ def update_marks():
 
 
 # ---------------- DOWNLOAD EXCEL TEMPLATE ----------------
-@app.route("/download_marks_template")
-def download_marks_template():
-    students = Student.query.all()
+@app.route("/download_marks_template/<int:form>/<int:year>/<int:term>")
+def download_marks_template(form, year, term):
+    # Filter students by the calculated form requested
+    all_students = Student.query.all()
+    students = [s for s in all_students if s.calculated_current_form == form]
     
-    COMPULSORY_SUBJECTS = [
-        "English",
-        "Mathematics",
-        "Biology",
-        "Chemistry",
-        "Physics",
-        "Kiswahili"
-    ]
+    COMPULSORY_SUBJECTS = ["English", "Mathematics", "Biology", "Chemistry", "Physics", "Kiswahili"]
     
-    columns = ["adm_no", "student_name"] + COMPULSORY_SUBJECTS + ["ARTS", "APPLIED"]
-
+    # Added form, year, term to columns so the upload can read them
+    columns = ["adm_no", "student_name", "form", "year", "term"] + COMPULSORY_SUBJECTS + ["ARTS", "APPLIED"]
     data = []
 
     for student in students:
-        row = {"adm_no": student.adm_no, "student_name": student.first_name}
+        # Reverted to your exact naming: student.first_name
+        row = {"adm_no": student.adm_no, "student_name": student.first_name, "form": form, "year": year, "term": term}
 
         for subject in COMPULSORY_SUBJECTS:
             row[subject] = ""
 
         row["ARTS"] = "" 
         row["APPLIED"] = "" 
-        
         data.append(row)
 
     if not data:
@@ -320,7 +315,6 @@ def download_marks_template():
 # ---------------- UPLOAD EXCEL MARKS ----------------
 @app.route("/import_marks", methods=["GET", "POST"])
 def import_marks():
-
     if current_user.role != "ADMIN":
         flash("Unauthorized access!")
         return redirect("/login")
@@ -347,10 +341,6 @@ def import_marks():
             flash("Excel must contain an 'adm_no' column", "error")
             return redirect("/import_marks")
         
-        settings = get_settings() 
-        curr_year = settings.current_academic_year
-        curr_term = settings.current_term
-
         compulsory_subjects = Subject.query.filter_by(category="COMPULSORY").all()
 
         for _, row in df.iterrows():
@@ -362,7 +352,11 @@ def import_marks():
                 flash(f"Student {adm_no} not found. Skipping.", "warning")
                 continue
 
-            student_form = student.calculated_current_form
+            # CRITICAL UPDATE: Read these from the Excel row instead of global settings
+            # This ensures the upload matches the template's designated period
+            student_form = int(row["form"])
+            curr_year = int(row["year"])
+            curr_term = int(row["term"])
 
             subject_count = 0
             total_points = 0
@@ -381,11 +375,13 @@ def import_marks():
                 except (ValueError, TypeError):
                     flash(f"Invalid mark {mark} for {subject.subject_name} for {adm_no}", "warning")
                     continue
+                
+                # Using your exact function signature
                 save_or_update_result(student, subject, mark, student_form, curr_term, curr_year)
                 subject_count += 1
                 total_points += grade_and_points(mark)[1]
 
-            # ARTS
+            # ARTS (Keeping your exact logic and naming)
             if "ARTS" in df.columns and student.arts_subject_id:
                 arts_mark = row["ARTS"]
                 if not pd.isna(arts_mark):
@@ -397,7 +393,7 @@ def import_marks():
                     except (ValueError, TypeError):
                         flash(f"Invalid Arts mark for {adm_no}", "warning")
 
-            # APPLIED
+            # APPLIED (Keeping your exact logic and naming)
             if "APPLIED" in df.columns and student.applied_subject_id:
                 applied_mark = row["APPLIED"]
                 if not pd.isna(applied_mark):

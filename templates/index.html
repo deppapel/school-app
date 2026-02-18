@@ -162,6 +162,29 @@
 
         .logout-btn:hover { opacity: 0.9; }
 
+        /* Form Selector Style */
+        .form-btn-group {
+            margin-top: 12px;
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+        
+        .form-dl-btn {
+            background: var(--navy);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        
+        .form-dl-btn:hover {
+            background: var(--emerald);
+        }
+
     </style>
 </head>
 <body>
@@ -219,6 +242,17 @@
                     <span>Assign Subject</span>
                     <small>Manage Curriculum</small>
                 </a>
+
+                <div class="action-card" style="border-top: 4px solid #2578d1;">
+                    <i class="fa fa-file-excel" style="color: #2578d1;"></i>
+                    <span>Download Template</span>
+                    <small>Get pre-filled list by Form</small>
+                    <div class="form-btn-group">
+                        {% for f in [1, 2, 3, 4] %}
+                        <a href="/download_marks_template/{{ f }}/{{ settings.current_academic_year }}/{{ settings.current_term }}" class="form-dl-btn">F{{ f }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
 
                 <a href="/update_marks" class="action-card">
                     <i class="fa fa-pen-to-square"></i>
