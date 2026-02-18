@@ -154,7 +154,7 @@ def login():
                 db.session.add(user)
                 db.session.commit()
             login_user(user)
-        return redirect("/dashboard") # Send guests straight to the matrix
+            return redirect("/dashboard") # Send guests straight to the matrix
             
     return render_template("login.html")
 
