@@ -13,50 +13,63 @@
         .total-col { background-color: #e9ecef; font-weight: bold; }
         .grade-a { color: green; font-weight: bold; }
         .grade-e { color: red; }
+        /* Added button styling */
+        .btn-back { text-decoration: none; color: #007bff; font-weight: bold; margin-bottom: 20px; display: inline-block; }
+        .btn { padding: 8px 15px; border-radius: 4px; border: none; cursor: pointer; text-decoration: none; font-size: 0.9em; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
     </style>
 </head>
 <body>
 
     <h2>Student Performance Matrix</h2>
+    
     <div class="navigation-links">
         {% if current_user.role == 'ADMIN' %}
         <a href="/" class="btn-back">← Back to Admin Control Center</a>
-        {% elif current_user.role == 'GUEST' %}
+        {% elif current_user.role == 'STUDENT' or current_user.role == 'GUEST' %}
         <a href="/dashboard" class="btn-back">← Back to My Student Portal</a>
         {% endif %}
     </div>
+
     <div class="filter-section" style="margin-bottom: 20px; padding: 15px; background: #f4f4f4; border-radius: 8px;">
-    <form action="/results" method="GET" style="display: flex; gap: 15px; align-items: end;">
-        
-        <div>
-            <label>Academic Year:</label><br>
-            <input type="number" name="year" value="{{ sel_year }}" class="form-control" style="width: 100px;">
-        </div>
+    {% if current_user.role == 'ADMIN' %}
+        <form action="/results" method="GET" style="display: flex; gap: 15px; align-items: end;">
+            <div>
+                <label>Academic Year:</label><br>
+                <input type="number" name="year" value="{{ sel_year }}" class="form-control" style="width: 100px;">
+            </div>
 
-        <div>
-            <label>Term:</label><br>
-            <select name="term" class="form-control">
-                <option value="1" {% if sel_term == 1 %}selected{% endif %}>Term 1</option>
-                <option value="2" {% if sel_term == 2 %}selected{% endif %}>Term 2</option>
-                <option value="3" {% if sel_term == 3 %}selected{% endif %}>Term 3</option>
-            </select>
-        </div>
+            <div>
+                <label>Term:</label><br>
+                <select name="term" class="form-control">
+                    <option value="1" {% if sel_term == 1 %}selected{% endif %}>Term 1</option>
+                    <option value="2" {% if sel_term == 2 %}selected{% endif %}>Term 2</option>
+                    <option value="3" {% if sel_term == 3 %}selected{% endif %}>Term 3</option>
+                </select>
+            </div>
 
-        <div>
-            <label>Form:</label><br>
-            <select name="form" class="form-control">
-                <option value="">All Forms</option>
-                <option value="1" {% if sel_form == 1 %}selected{% endif %}>Form 1</option>
-                <option value="2" {% if sel_form == 2 %}selected{% endif %}>Form 2</option>
-                <option value="3" {% if sel_form == 3 %}selected{% endif %}>Form 3</option>
-                <option value="4" {% if sel_form == 4 %}selected{% endif %}>Form 4</option>
-            </select>
-        </div>
+            <div>
+                <label>Form:</label><br>
+                <select name="form" class="form-control">
+                    <option value="">All Forms</option>
+                    <option value="1" {% if sel_form == 1 %}selected{% endif %}>Form 1</option>
+                    <option value="2" {% if sel_form == 2 %}selected{% endif %}>Form 2</option>
+                    <option value="3" {% if sel_form == 3 %}selected{% endif %}>Form 3</option>
+                    <option value="4" {% if sel_form == 4 %}selected{% endif %}>Form 4</option>
+                </select>
+            </div>
 
-        <button type="submit" class="btn btn-primary">Search Matrix</button>
-        <a href="/results" class="btn btn-secondary">Reset to Current</a>
-    </form>
-</div>
+            <button type="submit" class="btn btn-primary">Search Matrix</button>
+            <a href="/results" class="btn btn-secondary">Reset to Current</a>
+        </form>
+    {% else %}
+        <div style="color: #343a40; font-weight: bold;">
+            <i class="fa fa-info-circle"></i> Viewing Results for Form {{ sel_form }} | Term {{ sel_term }} | Year {{ sel_year }}
+        </div>
+    {% endif %}
+    </div>
+
     <table>
         <thead>
             <tr>

@@ -171,15 +171,18 @@ def student_dashboard():
 
 # ---------------- ROUTES ----------------
 @app.route("/")
-@login_required
 def index():
-    if current_user.role != "ADMIN":
-        return redirect("/dashboard")
-
-    # Fetch settings using your helper function
-    settings = get_settings()
-
-    return render_template("index.html", settings=settings)
+    # If the user is NOT logged in, send them straight to the login page
+    if not current_user.is_authenticated:
+        return redirect("/login")
+    
+    # If they ARE logged in, check their role to see where they go
+    if current_user.role == 'ADMIN':
+        settings = get_settings()
+        return render_template("index.html", settings=settings)
+    
+    # If they are a student, send them to their results or portal
+    return redirect("/dashboard")
 
 
 # ---------------- ADD STUDENT ----------------
@@ -438,6 +441,14 @@ def results():
     sel_term = request.args.get('term', settings.current_term, type=int)
 
     sel_form = request.args.get('form', type=int)
+
+    if current_user.role == 'STUDENT':
+        student_rec = Student.query.filter_by(adm_no=current_user.username).first()
+        if student_rec:
+            sel_form = student_rec.calculated_current_form
+        else:
+            flash("Student record not found.", "error")
+            return redirect("/")
 
     # 2. FILTER STUDENTS
     all_students = Student.query.all()
