@@ -531,6 +531,16 @@ if __name__ == "__main__":
         if not Subject.query.first():
             seed_subjects()
 
+        if not SystemSettings.query.first():
+            default_settings = SystemSettings(current_academic_year=2026, current_term=1)
+            db.session.add(default_settings)
+            
+        # 3. Seed Admin User
+        if not User.query.filter_by(username="admin").first():
+            admin = User(username="admin", password="school123", role="ADMIN")
+            db.session.add(admin)
+            
+        db.session.commit()
     port = int(os.environ.get("PORT", 5000))
     
     app.run(host='0.0.0.0', port=port, debug=True)
