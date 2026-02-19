@@ -197,7 +197,6 @@ def index():
 @login_required
 def add_student():
     if current_user.role != 'ADMIN':
-        logout_user()
         flash("Unauthorized acces! please login as admin")
         return redirect("/login")
     
@@ -243,7 +242,6 @@ def add_student():
 @login_required
 def add_subject():
     if current_user.role != 'ADMIN':
-        logout_user()
         flash("Unauthorized acces! please login as admin")
         return redirect("/login")
     
