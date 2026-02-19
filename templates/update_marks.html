@@ -1,5 +1,10 @@
 <form method="POST">
-
+<div style="margin-bottom: 20px;">
+    <a href="/" style="text-decoration: none; color: #007bff; font-weight: bold;">
+        <i class="fas fa-arrow-left"></i> ← Back to Admin Dashboard
+    </a>
+</div>
+<hr>
 <select name="student" required>
   {% for student in students %}
     <option value="{{ student.id }}">

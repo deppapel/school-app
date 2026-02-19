@@ -158,6 +158,13 @@ def login():
             
     return render_template("login.html")
 
+@app.after_request
+def add_header(response):
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
 @app.route("/dashboard")
 @login_required
 def student_dashboard():
@@ -187,7 +194,13 @@ def index():
 
 # ---------------- ADD STUDENT ----------------
 @app.route("/add_student", methods=["GET", "POST"])
+@login_required
 def add_student():
+    if current_user.role != 'ADMIN':
+        logout_user()
+        flash("Unauthorized acces! please login as admin")
+        return redirect("/login")
+    
     arts_subjects = Subject.query.filter_by(category="ARTS").all()
     applied_subjects = Subject.query.filter_by(category="APPLIED").all()
 
@@ -227,7 +240,13 @@ def add_student():
 
 # ---------------- ADD SUBJECT ----------------
 @app.route("/add_subject", methods=["GET", "POST"])
+@login_required
 def add_subject():
+    if current_user.role != 'ADMIN':
+        logout_user()
+        flash("Unauthorized acces! please login as admin")
+        return redirect("/login")
+    
     if request.method == "POST":
         try:
             subject_name = request.form["subject_name"]
@@ -317,6 +336,7 @@ def download_marks_template(form, year, term):
 
 # ---------------- UPLOAD EXCEL MARKS ----------------
 @app.route("/import_marks", methods=["GET", "POST"])
+@login_required
 def import_marks():
     if current_user.role != "ADMIN":
         flash("Unauthorized access!")
