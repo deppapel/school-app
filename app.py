@@ -192,6 +192,34 @@ def index():
     return redirect("/dashboard")
 
 
+from flask import jsonify
+
+@app.route("/search_students")
+@login_required
+def search_students():
+    # Only admins can search (same as the main update_marks page)
+    if current_user.role != "ADMIN":
+        return jsonify([]), 403
+
+    query = request.args.get('q', '').strip()
+    if len(query) < 1:
+        return jsonify([])
+
+    # Search by adm_no (case-insensitive partial match)
+    students = Student.query.filter(Student.adm_no.ilike(f'%{query}%')).limit(10).all()
+
+    results = []
+    for s in students:
+        results.append({
+            'id': s.id,
+            'adm_no': s.adm_no,
+            'first_name': s.first_name,
+            'second_name': s.second_name or '',
+            'current_form': s.calculated_current_form
+        })
+
+    return jsonify(results)
+
 # ---------------- ADD STUDENT ----------------
 @app.route("/add_student", methods=["GET", "POST"])
 @login_required
@@ -268,7 +296,7 @@ def update_marks():
     if current_user.role != "ADMIN":
         flash("Unauthorised! Only school admin can modify marks")
         return redirect("/login")
-    student = Student.query.all()
+    
     subject = Subject.query.all()
     settings = get_settings()
     if request.method == "POST":
@@ -280,22 +308,26 @@ def update_marks():
             student = Student.query.get(student_id)
             subject = Subject.query.get(subject_id)
 
-            existing = Result.query.filter_by(student_id=student.id, subject_id=subject_id).first()
+            if not student or not subject:
+                flash("Invalid student or subject selected", "error")
+                return redirect("/update_marks")
+
+            existing = Result.query.filter_by(student_id=student.id, subject_id=subject_id, form=student.calculated_current_form, term=settings.current_term, academic_year=settings.current_academic_year).first()
 
             save_or_update_result(student, subject, mark, student.calculated_current_form, settings.current_term, settings.current_academic_year)
             db.session.commit()
 
             if existing:
-                flash(f"Marks updated for {student.first_name} in {subject.subject_name}")   
+                flash(f"Marks updated for {student.first_name} in {subject.subject_name}", "success")   
             else:
-                flash(f"marks added for {student.first_name} in {subject.subject_name}")             
+                flash(f"marks added for {student.first_name} in {subject.subject_name}", "success")             
             return redirect("/update_marks")
 
         except Exception as e:
             db.session.rollback()
             flash(f"Error adding marks: {str(e)}", "error")
 
-    return render_template("update_marks.html",student=student,  subjects=subject)
+    return render_template("update_marks.html",  subjects=subject)
 
 
 # ---------------- DOWNLOAD EXCEL TEMPLATE ----------------
