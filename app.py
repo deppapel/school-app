@@ -4,8 +4,7 @@ from models import db, Student, Subject, Result, User, SystemSettings
 import pandas as pd
 import tempfile
 from flask_login import LoginManager, login_required, current_user, login_user, logout_user
-import os
-
+from flask import jsonify
 
 def get_settings():
     settings = SystemSettings.query.first()
@@ -192,8 +191,6 @@ def index():
     return redirect("/dashboard")
 
 
-from flask import jsonify
-
 @app.route("/search_students")
 @login_required
 def search_students():
@@ -332,36 +329,63 @@ def update_marks():
 
 # ---------------- DOWNLOAD EXCEL TEMPLATE ----------------
 @app.route("/download_marks_template/<int:form>/<int:year>/<int:term>")
+@login_required
 def download_marks_template(form, year, term):
-    # Filter students by the calculated form requested
-    all_students = Student.query.all()
-    students = [s for s in all_students if s.calculated_current_form == form]
+    # Protect route – only admins can download templates
+    if current_user.role != 'ADMIN':
+        flash("Unauthorized access!", "error")
+        return redirect("/login")
     
-    COMPULSORY_SUBJECTS = ["English", "Mathematics", "Biology", "Chemistry", "Physics", "Kiswahili"]
-    
-    # Added form, year, term to columns so the upload can read them
-    columns = ["adm_no", "student_name", "form", "year", "term"] + COMPULSORY_SUBJECTS + ["ARTS", "APPLIED"]
+    # Get current academic year from settings (needed for form calculation)
+    settings = get_settings()
+    current_year = settings.current_academic_year
+
+    # --- Efficiently fetch only students in the requested form ---
+    # Use a database expression to compute current form on the fly
+    students = Student.query.filter(
+        Student.entry_form + current_year - Student.admission_year == form
+    ).all()
+
+    # --- Get compulsory subject names from the database ---
+    compulsory_subjects = Subject.query.filter_by(category="COMPULSORY").all()
+    compulsory_subject_names = [s.subject_name for s in compulsory_subjects]
+
+    # Build columns list dynamically
+    columns = ["adm_no", "student_name", "form", "year", "term"] + compulsory_subject_names + ["ARTS", "APPLIED"]
     data = []
 
     for student in students:
-        # Reverted to your exact naming: student.first_name
-        row = {"adm_no": student.adm_no, "student_name": student.first_name, "form": form, "year": year, "term": term}
-
-        for subject in COMPULSORY_SUBJECTS:
-            row[subject] = ""
-
-        row["ARTS"] = "" 
-        row["APPLIED"] = "" 
+        row = {
+            "adm_no": student.adm_no,
+            "student_name": f"{student.first_name} {student.second_name or ''}".strip(),  # optional: full name
+            "form": form,
+            "year": year,
+            "term": term
+        }
+        # Empty cells for each compulsory subject
+        for subj in compulsory_subject_names:
+            row[subj] = ""
+        # Empty cells for optional subjects
+        row["ARTS"] = ""
+        row["APPLIED"] = ""
         data.append(row)
 
+    # If no students in that form, add one empty row (to keep template usable)
     if not data:
-        data.append({col: "" for col in columns})    
+        data.append({col: "" for col in columns})
 
+    # Create Excel file
     df = pd.DataFrame(data, columns=columns)
     tmp = tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False)
     df.to_excel(tmp.name, index=False)
     tmp.close()
-    return send_file(tmp.name, as_attachment=True)
+
+    # Send file with a meaningful name
+    return send_file(
+        tmp.name,
+        as_attachment=True,
+        download_name=f"marks_template_form{form}_term{term}_{year}.xlsx"
+    )
 
 
 # ---------------- UPLOAD EXCEL MARKS ----------------
