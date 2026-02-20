@@ -42,7 +42,8 @@ class Student(db.Model):
         years_passed = settings.current_academic_year - self.admission_year
 
         return self.entry_form + years_passed
-       except:
+       except Exception as e:
+           print(f"Error calculating form: {e}")
            return self.entry_form
 
     # Optional subjects

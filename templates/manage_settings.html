@@ -1,7 +1,7 @@
 <h2>System Settings</h2>
 <form method="POST">
     <label>Current Academic Year:</label>
-    <input type="number" name="year" value="{{ settings.current_academic_year }}" required>
+    <input type="number" name="year" value="{{ settings.current_academic_year }}" min="2024"  max="2100">
     
     <label>Current Term:</label>
     <select name="term">

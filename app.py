@@ -25,7 +25,7 @@ db.init_app(app)
 def manage_settings():
     if current_user.role != "ADMIN":
         flash("Unauthorized access!")
-        return redirect("/")
+        return redirect("/login")
     
     settings = get_settings()
     if request.method == "POST":
@@ -268,19 +268,23 @@ def update_marks():
     if current_user.role != "ADMIN":
         flash("Unauthorised! Only school admin can modify marks")
         return redirect("/login")
-    student = Student.query.all()
+    
     subject = Subject.query.all()
     settings = get_settings()
     if request.method == "POST":
         try:
-            student_id = request.form["student"]
+            adm_no = request.form["adm_no"]
             subject_id = request.form["subject"]
             mark = float(request.form["marks"])
 
-            student = Student.query.get(student_id)
+            student = Student.query.filter_by(adm_no=adm_no).first()
+            if not student:
+                flash(f"Student with number {adm_no} not found")
+                return redirect("/update_marks")
+            
             subject = Subject.query.get(subject_id)
 
-            existing = Result.query.filter_by(student_id=student_id, subject_id=subject_id).first()
+            existing = Result.query.filter_by(student_id=student.id, subject_id=subject_id).first()
 
             save_or_update_result(student, subject, mark, student.calculated_current_form, settings.current_term, settings.current_academic_year)
             db.session.commit()
@@ -295,7 +299,7 @@ def update_marks():
             db.session.rollback()
             flash(f"Error adding marks: {str(e)}", "error")
 
-    return render_template("update_marks.html", students=student, subjects=subject)
+    return render_template("update_marks.html",  subjects=subject)
 
 
 # ---------------- DOWNLOAD EXCEL TEMPLATE ----------------
