@@ -7,264 +7,270 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: #f0f4f8;
-        padding: 10px;
-        display: flex;
-        justify-content: center;
-    }
-    .report-card {
-        max-width: 1200px;
-        width: 100%;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        overflow: hidden;
-    }
-    /* Header - more compact */
-    .header {
-        background: linear-gradient(135deg, #1e3c72, #2a5298);
-        color: white;
-        padding: 15px 20px;
-        text-align: center;
-    }
-    .header h1 {
-        font-size: 1.8rem;
-        margin-bottom: 5px;
-    }
-    .header h2 {
-        font-weight: 400;
-        font-size: 1rem;
-        opacity: 0.9;
-    }
-    /* Student info - compact row */
-    .student-info {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        background: #f8fafc;
-        padding: 10px 15px;
-        border-bottom: 1px solid #e2e8f0;
-        font-size: 0.9rem;
-    }
-    .info-item {
-        margin: 2px 0;
-    }
-    .info-item strong {
-        color: #2a5298;
-    }
-    /* Main content - less padding */
-    .content {
-        padding: 15px;
-    }
-    /* Table - more compact */
-    .subjects-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 15px;
-        background: white;
-        border-radius: 6px;
-        overflow: hidden;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-        font-size: 0.85rem;
-    }
-    .subjects-table th {
-        background: #2a5298;
-        color: white;
-        padding: 8px 6px;
-        font-weight: 600;
-        text-align: left;
-    }
-    .subjects-table td {
-        padding: 6px;
-        border-bottom: 1px solid #e2e8f0;
-    }
-    .subjects-table tr:last-child td {
-        border-bottom: none;
-    }
-    .subjects-table tr:nth-child(even) {
-        background: #f8fafc;
-    }
-    /* Remark colors */
-    .remark-excellent { color: #059669; font-weight: 600; }
-    .remark-good { color: #0284c7; font-weight: 600; }
-    .remark-fair { color: #b45309; font-weight: 600; }
-    .remark-needs { color: #b91c1c; font-weight: 600; }
-
-    /* Summary cards - more compact */
-    .summary {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-        margin-bottom: 15px;
-    }
-    .card {
-        background: white;
-        padding: 10px;
-        border-radius: 8px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-        text-align: center;
-        border: 1px solid #e2e8f0;
-    }
-    .card .label {
-        font-size: 0.7rem;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    .card .value {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #1e3c72;
-        line-height: 1.2;
-    }
-    /* Charts - smaller and optional; you can hide on mobile if needed */
-    .charts {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        margin-bottom: 15px;
-    }
-    .chart-container {
-        background: white;
-        padding: 10px;
-        border-radius: 8px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-        border: 1px solid #e2e8f0;
-    }
-    canvas {
-        width: 100%;
-        height: auto;
-        max-height: 150px; /* Smaller charts */
-    }
-
-    /* Comments - more compact */
-    .comments {
-        background: #f8fafc;
-        padding: 12px;
-        border-radius: 8px;
-        margin-bottom: 15px;
-        border-left: 4px solid #2a5298;
-        font-size: 0.85rem;
-    }
-    .comment-item {
-        margin-bottom: 8px;
-    }
-    .comment-item strong {
-        color: #1e3c72;
-    }
-
-    /* Footer */
-    .footer {
-        background: #1e3c72;
-        color: white;
-        padding: 12px 15px;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 0.8rem;
-    }
-    .signatures {
-        display: flex;
-        gap: 20px;
-    }
-    .signature-line {
-        margin-top: 3px;
-        width: 100px;
-        height: 2px;
-        background: white;
-    }
-    .print-button {
-        background: white;
-        color: #1e3c72;
-        border: none;
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: 0.2s;
-        font-size: 0.8rem;
-    }
-    .print-button:hover {
-        background: #f0f4f8;
-    }
-
-    /* Print styles */
-    @media print {
-        body {
-            background: white;
-            padding: 0;
+        * {
             margin: 0;
-            font-size: 8pt;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
         }
         .report-card {
-            box-shadow: none;
-            border-radius: 0;
+            max-width: 1200px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
+        /* Header – slightly reduced */
         .header {
-            background: #1e3c72 !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-            padding: 8px;
-        }
-        .header h1 { font-size: 14pt; }
-        .header h2 { font-size: 9pt; }
-        .student-info { padding: 5px 10px; font-size: 7pt; }
-        .subjects-table th,
-        .subjects-table td { padding: 3px 4px; font-size: 7pt; }
-        .subjects-table th { background: #2a5298 !important; }
-        .summary { gap: 4px; }
-        .card { padding: 4px; }
-        .card .value { font-size: 11pt; }
-        .card .label { font-size: 6pt; }
-        .charts { margin: 5px 0; gap: 5px; }
-        .chart-container { padding: 3px; }
-        canvas { max-height: 80px; }
-        .comments { padding: 5px; font-size: 7pt; }
-        .footer { padding: 5px 8px; font-size: 7pt; }
-        .print-button { display: none; }
-        @page {
-            size: A4 landscape;
-            margin: 0.3in;
-        }
-    }
-
-    /* Mobile responsiveness */
-    @media (max-width: 600px) {
-        .student-info {
-            flex-direction: column;
-            gap: 3px;
-        }
-        .summary {
-            grid-template-columns: 1fr; /* stack cards */
-        }
-        .charts {
-            grid-template-columns: 1fr; /* stack charts */
-        }
-        .footer {
-            flex-direction: column;
-            gap: 8px;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 15px 20px;
             text-align: center;
         }
-        .signatures {
-            flex-direction: column;
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 4px;
+        }
+        .header h2 {
+            font-weight: 400;
+            font-size: 1rem;
+        }
+        /* Student info – compact row */
+        .student-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            background: #f8fafc;
+            padding: 8px 15px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+        }
+        .info-item strong {
+            color: #2a5298;
+        }
+        /* Content area – reduced padding */
+        .content {
+            padding: 15px;
+        }
+        /* Table – more compact, but readable */
+        .subjects-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            font-size: 0.8rem;  /* slightly smaller */
+        }
+        .subjects-table th {
+            background: #2a5298;
+            color: white;
+            padding: 6px 4px;
+            font-weight: 600;
+            text-align: left;
+        }
+        .subjects-table td {
+            padding: 5px 4px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .subjects-table tr:last-child td {
+            border-bottom: none;
+        }
+        .subjects-table tr:nth-child(even) {
+            background: #f8fafc;
+        }
+        /* Remark colors */
+        .remark-excellent { color: #059669; font-weight: 600; }
+        .remark-good { color: #0284c7; font-weight: 600; }
+        .remark-fair { color: #b45309; font-weight: 600; }
+        .remark-needs { color: #b91c1c; font-weight: 600; }
+
+        /* Summary cards – smaller */
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 8px;
+            margin-bottom: 15px;
         }
-        .subjects-table th, .subjects-table td {
-            padding: 4px 3px;
+        .card {
+            background: white;
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        .card .label {
             font-size: 0.7rem;
+            color: #64748b;
+            text-transform: uppercase;
         }
-        /* Optional: hide charts on mobile to save space */
-        /* .charts { display: none; } */
-    }
-</style>
+        .card .value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1e3c72;
+            line-height: 1.2;
+        }
+
+        /* Charts – keep them prominent */
+        .charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .chart-container {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+        canvas {
+            width: 100%;
+            height: auto;
+            min-height: 180px;   /* ensures readability */
+            max-height: 220px;
+        }
+
+        /* Comments – compact */
+        .comments {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #2a5298;
+            font-size: 0.85rem;
+        }
+        .comment-item {
+            margin-bottom: 6px;
+        }
+        .comment-item strong {
+            color: #1e3c72;
+        }
+
+        /* Footer – compact */
+        .footer {
+            background: #1e3c72;
+            color: white;
+            padding: 10px 15px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+        .signatures {
+            display: flex;
+            gap: 20px;
+        }
+        .signature-line {
+            margin-top: 3px;
+            width: 100px;
+            height: 2px;
+            background: white;
+        }
+        .print-button {
+            background: white;
+            color: #1e3c72;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.8rem;
+        }
+        .print-button:hover {
+            background: #f0f4f8;
+        }
+
+        /* Print styles – keep graphs readable */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+                font-size: 8pt;
+            }
+            .report-card {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            .header {
+                background: #1e3c72 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                padding: 8px;
+            }
+            .header h1 { font-size: 14pt; }
+            .header h2 { font-size: 9pt; }
+            .student-info { padding: 4px 8px; font-size: 7pt; }
+            .subjects-table th,
+            .subjects-table td { padding: 3px 3px; font-size: 7pt; }
+            .subjects-table th { background: #2a5298 !important; }
+            .summary { gap: 4px; }
+            .card { padding: 4px; }
+            .card .value { font-size: 11pt; }
+            .card .label { font-size: 6pt; }
+            .charts {
+                gap: 8px;
+                margin: 10px 0;
+            }
+            .chart-container {
+                padding: 8px;
+            }
+            canvas {
+                min-height: 130px;   /* still readable */
+                max-height: 150px;
+            }
+            .comments { padding: 5px; font-size: 7pt; }
+            .footer { padding: 5px 8px; font-size: 7pt; }
+            .print-button { display: none; }
+            @page {
+                size: A4 landscape;
+                margin: 0.3in;
+            }
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            .student-info {
+                flex-direction: column;
+                gap: 3px;
+            }
+            .summary {
+                grid-template-columns: 1fr; /* stack cards */
+            }
+            .charts {
+                grid-template-columns: 1fr; /* stack charts */
+            }
+            .footer {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+            .signatures {
+                flex-direction: column;
+                gap: 8px;
+            }
+            /* Make table scrollable horizontally on very small screens */
+            .content {
+                overflow-x: auto;
+            }
+            .subjects-table {
+                min-width: 600px; /* forces horizontal scroll if needed */
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="report-card">
