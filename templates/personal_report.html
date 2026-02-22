@@ -2,102 +2,394 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Report Card - {{ student.first_name }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>End Term Report - {{ student.first_name }} {{ student.second_name }}</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Courier New', Courier, monospace; padding: 40px; background-color: #f4f4f4; }
-        .report-box { max-width: 800px; margin: auto; background: white; padding: 30px; border: 2px solid #333; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        .header { text-align: center; border-bottom: 2px solid #333; margin-bottom: 20px; }
-        
-        /* Filter Section - Hidden on Print */
-        .filter-section { 
-            max-width: 800px; margin: 0 auto 20px auto; 
-            background: #e9ecef; padding: 15px; 
-            border: 1px solid #ccc; border-radius: 4px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .filter-section form { display: flex; gap: 10px; align-items: center; justify-content: center; }
-        .btn-view { background: #333; color: white; border: none; padding: 5px 15px; cursor: pointer; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .report-card {
+            max-width: 1200px;
+            width: 100%;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+        }
+        .header h2 {
+            font-weight: 400;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        .student-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            background: #f8fafc;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .info-item {
+            font-size: 1rem;
+        }
+        .info-item strong {
+            color: #2a5298;
+        }
+        .content {
+            padding: 30px;
+        }
+        .subjects-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .subjects-table th {
+            background: #2a5298;
+            color: white;
+            padding: 12px;
+            font-weight: 600;
+            text-align: left;
+        }
+        .subjects-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .subjects-table tr:last-child td {
+            border-bottom: none;
+        }
+        .subjects-table tr:nth-child(even) {
+            background: #f8fafc;
+        }
+        .remark-excellent { color: #059669; font-weight: 600; }
+        .remark-good { color: #0284c7; font-weight: 600; }
+        .remark-fair { color: #b45309; font-weight: 600; }
+        .remark-needs { color: #b91c1c; font-weight: 600; }
 
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { border: 1px solid #999; padding: 10px; text-align: left; }
-        th { background-color: #eee; }
-        .total-section { font-weight: bold; font-size: 1.2em; margin-top: 20px; border-top: 1px dashed #333; padding-top: 10px; }
-        .stamp { margin-top: 50px; text-align: right; font-style: italic; color: #555; }
-        
-        .no-data-msg { text-align: center; padding: 40px; border: 1px dashed #999; color: #666; }
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        .card .label {
+            font-size: 0.9rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e3c72;
+        }
+        .charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+        canvas {
+            width: 100%;
+            height: auto;
+            max-height: 250px;
+        }
+
+        .comments {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 5px solid #2a5298;
+        }
+        .comment-item {
+            margin-bottom: 15px;
+        }
+        .comment-item strong {
+            color: #1e3c72;
+        }
+
+        .footer {
+            background: #1e3c72;
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .signatures {
+            display: flex;
+            gap: 40px;
+        }
+        .signature-line {
+            margin-top: 5px;
+            width: 150px;
+            height: 2px;
+            background: white;
+        }
+        .print-button {
+            background: white;
+            color: #1e3c72;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .print-button:hover {
+            background: #f0f4f8;
+        }
 
         @media print {
-            .filter-section, .back-link { display: none; }
-            body { background-color: white; padding: 0; }
-            .report-box { border: 2px solid #333; box-shadow: none; }
+            body {
+                background: white;
+                padding: 0;
+            }
+            .report-card {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            .print-button {
+                display: none;
+            }
+            .header {
+                background: #1e3c72 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .subjects-table th {
+                background: #2a5298 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .charts {
+                grid-template-columns: 1fr;
+            }
+            .student-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .footer {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            .signatures {
+                flex-direction: column;
+                gap: 20px;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="report-card">
+        <div class="header">
+            <h1>END TERM REPORT</h1>
+            <h2>Academic Year {{ sel_year }} | Term {{ sel_term }}</h2>
+        </div>
 
-<div class="filter-section">
-    <form method="GET" action="/my_report_card">
-        <label>Year:</label>
-        <input type="number" name="year" value="{{ sel_year }}" style="width: 70px;">
-        <label>Term:</label>
-        <select name="term">
-            <option value="1" {% if sel_term == 1 %}selected{% endif %}>1</option>
-            <option value="2" {% if sel_term == 2 %}selected{% endif %}>2</option>
-            <option value="3" {% if sel_term == 3 %}selected{% endif %}>3</option>
-        </select>
-        <button type="submit" class="btn-view">Filter Report</button>
-        <button type="button" class="btn-view" onclick="window.print()">Print PDF</button>
-    </form>
-</div>
+        <div class="student-info">
+            <div class="info-item"><strong>Name:</strong> {{ student.first_name }} {{ student.second_name }}</div>
+            <div class="info-item"><strong>Admission No:</strong> {{ student.adm_no }}</div>
+            <div class="info-item"><strong>Form:</strong> {{ form_at_time }}</div>
+            <div class="info-item"><strong>Term:</strong> {{ sel_term }}</div>
+            <div class="info-item"><strong>Year:</strong> {{ sel_year }}</div>
+        </div>
 
-<div class="report-box">
-    <div class="header">
-        <h1>OFFICIAL STUDENT REPORT CARD</h1>
-        <p><strong>Name:</strong> {{ student.first_name }} {{ student.second_name }}</p>
-        <p><strong>Admission No:</strong> {{ student.adm_no }}</p>
-        <p><strong>Academic Period:</strong> {{ sel_year }} - Term {{ sel_term }}</p>
+        <div class="content">
+            <table class="subjects-table">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Score</th>
+                        <th>Grade</th>
+                        <th>Points</th>
+                        <th>Remark</th>
+                        <th>Teacher's Comment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subj in subject_details %}
+                    <tr>
+                        <td>{{ subj.name }}</td>
+                        <td>{{ subj.score }}</td>
+                        <td>{{ subj.grade }}</td>
+                        <td>{{ subj.points }}</td>
+                        <td class="
+                            {% if subj.remark == 'Excellent' %}remark-excellent
+                            {% elif subj.remark == 'Good' %}remark-good
+                            {% elif subj.remark == 'Fair' %}remark-fair
+                            {% else %}remark-needs{% endif %}">
+                            {{ subj.remark }}
+                        </td>
+                        <td>{{ subj.teacher_comment }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="summary">
+                <div class="card">
+                    <div class="label">Total Points</div>
+                    <div class="value">{{ total_points }}</div>
+                </div>
+                <div class="card">
+                    <div class="label">Mean Grade</div>
+                    <div class="value">{{ final_grade }}</div>
+                </div>
+                <div class="card">
+                    <div class="label">Class Position</div>
+                    <div class="value">{{ rank }} / {{ total_students }}</div>
+                </div>
+            </div>
+
+            <div class="charts">
+                <div class="chart-container">
+                    <canvas id="termChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="subjectChart"></canvas>
+                </div>
+            </div>
+
+            <div class="comments">
+                <div class="comment-item">
+                    <strong>Class Teacher's Comment:</strong> {{ overall_teacher_comment }}
+                </div>
+                <div class="comment-item">
+                    <strong>Head Teacher's Remarks:</strong> {{ head_teacher_remark }}
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="signatures">
+                <div>
+                    <div>Class Teacher</div>
+                    <div class="signature-line"></div>
+                </div>
+                <div>
+                    <div>Head Teacher</div>
+                    <div class="signature-line"></div>
+                </div>
+            </div>
+            <div>Date: {{ date_of_issue }}</div>
+            <button class="print-button" onclick="window.print()">🖨️ Print Report</button>
+        </div>
     </div>
 
-    {% if results %}
-    <table>
-        <thead>
-            <tr>
-                <th>Subject</th>
-                <th>Marks (%)</th>
-                <th>Grade</th>
-                <th>Points</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for res in results %}
-            <tr>
-                <td>{{ res.subject.subject_name }}</td>
-                <td>{{ res.marks }}</td>
-                <td>{{ res.grade }}</td>
-                <td>{{ res.points }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <script>
+        // Data passed from Flask – all as JSON
+        const trendData = JSON.parse('{{ trend_data | tojson | safe }}');
+        const subjects = JSON.parse('{{ chart_subjects | tojson | safe }}');
+        const studentScores = JSON.parse('{{ chart_scores | tojson | safe }}');
+        const averageScores = JSON.parse('{{ average_scores | tojson | safe }}');
 
-    <div class="total-section">
-        <p>Total Marks: {{ results|sum(attribute='marks') }}</p>
-        <p>Total Points: {{ results|sum(attribute='points') }}</p>
-        <p>Final Mean Grade: <strong>{{ final_grade }}</strong></p>
-    </div>
-    {% else %}
-    <div class="no-data-msg">
-        <p>RECORD NOT FOUND</p>
-        <p>No marks have been recorded for the selected period ({{ sel_year }} Term {{ sel_term }}).</p>
-    </div>
-    {% endif %}
+        // Term performance bar chart
+        const termCtx = document.getElementById('termChart').getContext('2d');
+        new Chart(termCtx, {
+            type: 'bar',
+            data: {
+                labels: trendData.map(d => `Term ${d.term}`),
+                datasets: [{
+                    label: 'Total Points',
+                    data: trendData.map(d => d.points),
+                    backgroundColor: 'rgba(42, 82, 152, 0.7)',
+                    borderColor: '#1e3c72',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: { display: true, text: 'Performance Across Terms' }
+                },
+                scales: {
+                    y: { beginAtZero: true, max: 96 }
+                }
+            }
+        });
 
-    <div class="stamp">
-        <p>Generated on: 18th February 2026</p>
-        <p>School Principal's Signature: _________________</p>
-    </div>
-</div>
-
-<p style="text-align: center;" class="back-link"><a href="/dashboard">Back to Dashboard</a></p>
-
+        // Subject comparison line chart
+        const subjCtx = document.getElementById('subjectChart').getContext('2d');
+        new Chart(subjCtx, {
+            type: 'line',
+            data: {
+                labels: subjects,
+                datasets: [
+                    {
+                        label: 'Your Score',
+                        data: studentScores,
+                        borderColor: '#2a5298',
+                        backgroundColor: 'rgba(42, 82, 152, 0.1)',
+                        tension: 0.3,
+                        fill: false
+                    },
+                    {
+                        label: 'Class Average',
+                        data: averageScores,
+                        borderColor: '#b45309',
+                        backgroundColor: 'rgba(180, 83, 9, 0.1)',
+                        tension: 0.3,
+                        borderDash: [5, 5],
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: { display: true, text: 'Subject Performance Comparison' }
+                },
+                scales: {
+                    y: { beginAtZero: true, max: 100 }
+                }
+            }
+        });
+    </script>
 </body>
 </html>
