@@ -616,7 +616,6 @@ def my_report_card():
     # --- Validate selected year is within reasonable range ---
     if sel_year < student.admission_year:
         flash("You were not enrolled in that year.", "warning")
-        # Optionally redirect or adjust
         sel_year = student.admission_year
 
     # --- Calculate student's form at selected time ---
@@ -633,7 +632,6 @@ def my_report_card():
         term=sel_term
     ).all()
 
-    # If no results, show empty report gracefully
     if not results:
         flash("No results found for this term.", "info")
 
@@ -643,7 +641,6 @@ def my_report_card():
     applied_subjects = Subject.query.filter_by(category="APPLIED").all()
     all_subjects = compulsory_subjects + arts_subjects + applied_subjects
 
-    # Create a dict for quick lookup
     result_by_subject_id = {r.subject_id: r for r in results}
 
     subject_details = []
@@ -658,19 +655,15 @@ def my_report_card():
                 'score': r.marks,
                 'grade': r.grade,
                 'points': r.points,
-                'remark': remark,
-                'teacher_comment': f"Good progress in {subj.subject_name}."   # placeholder
+                'remark': remark
             })
-        else:
-            # Subject not taken (optional) – we might skip or show empty
-            pass
+        # else: subject not taken – skip
 
     # --- Compute totals ---
     total_points = sum(r.points for r in results)
     final_grade = student_final_grade(total_points)
 
     # --- Find classmates in the same form, term, year ---
-    # Efficient: query only students who were in that form at that time
     classmates = Student.query.filter(
         Student.entry_form + (sel_year - Student.admission_year) == form_at_time
     ).all()
@@ -689,13 +682,11 @@ def my_report_card():
     else:
         rank_data = []
 
-    # Convert to dict and add student with zero points if needed
     points_dict = {r.student_id: r.total_points for r in rank_data}
     # Ensure current student is in dict (even if no results, points = 0)
     if student.id not in points_dict:
         points_dict[student.id] = 0
 
-    # Sort by points descending, find rank
     sorted_students = sorted(points_dict.items(), key=lambda x: x[1], reverse=True)
     rank = 1
     for i, (sid, pts) in enumerate(sorted_students):
@@ -705,7 +696,6 @@ def my_report_card():
     total_students = len(sorted_students)
 
     # --- Compute class average per subject ---
-    # For each subject, get average mark among classmates who took it in this term
     subject_averages = {}
     if classmate_ids:
         avg_data = db.session.query(
@@ -718,10 +708,7 @@ def my_report_card():
         ).group_by(Result.subject_id).all()
         subject_averages = {a.subject_id: round(a.avg_mark, 1) for a in avg_data}
 
-    average_scores = []
-    for subj in subject_details:
-        avg = subject_averages.get(subj['id'], 0)
-        average_scores.append(avg)
+    average_scores = [subject_averages.get(subj['id'], 0) for subj in subject_details]
 
     # --- Trend data: fetch previous terms in same academic year ---
     trend_data = []
@@ -734,10 +721,53 @@ def my_report_card():
         term_points = sum(r.points for r in term_results)
         trend_data.append({'term': term, 'points': term_points})
 
-    # --- Overall comments (placeholders) ---
-    overall_teacher_comment = "A diligent student who participates well in class. Keep it up!"
-    head_teacher_remark = "Excellent performance. Encouraged to maintain focus."
+    # --- Find weakest subject for class teacher comment ---
+    if subject_details:
+        weakest = min(subject_details, key=lambda x: x['score'])
+        weakest_name = weakest['name']
+        weakest_score = weakest['score']
+    else:
+        weakest_name = "N/A"
+        weakest_score = 0
 
+    # --- Head teacher remark based on total points ---
+    if total_points >= 86:
+        head_teacher_remark = "Perfect! Maintain this excellence and aim for consistency."
+    elif total_points >= 82:
+        head_teacher_remark = "Outstanding! You are very close to an A. Keep the momentum."
+    elif total_points >= 78:
+        head_teacher_remark = "Excellent. Strive for an A- by refining your understanding."
+    elif total_points >= 74:
+        head_teacher_remark = "Very good. You are capable of an even higher grade."
+    elif total_points >= 70:
+        head_teacher_remark = "Great work! With a little more effort, you can attain a B."
+    elif total_points >= 66:
+        head_teacher_remark = "Commendable. Keep pushing – the next grade is within reach."
+    elif total_points >= 62:
+        head_teacher_remark = "Satisfactory performance. Aim higher by strengthening weak areas."
+    elif total_points >= 58:
+        head_teacher_remark = "Good effort. With consistent revision, you can achieve a higher grade."
+    elif total_points >= 48:
+        head_teacher_remark = "You are on the right track, but need to work harder to reach the next level."
+    else:
+        head_teacher_remark = "Needs significant improvement. Focus on core subjects and seek extra help."
+
+    # --- Class teacher remark based on rank and weakest subject ---
+    if total_students == 0:
+        overall_teacher_comment = "No data available for class comparison."
+    else:
+        if rank == 1:
+            overall_teacher_comment = f"Excellent performance! You are at the top of your class. Keep up the great work."
+        elif rank <= total_students * 0.1:  # top 10%
+            overall_teacher_comment = f"Very good! You are among the top performers. To reach the top, focus on {weakest_name} where you scored {weakest_score}."
+        elif rank <= total_students * 0.25:  # top 25%
+            overall_teacher_comment = f"Good job! You are in the top quarter. Work a bit more on {weakest_name} ({weakest_score}) to climb higher."
+        elif rank <= total_students * 0.5:  # top half
+            overall_teacher_comment = f"Satisfactory. You are in the top half. Putting extra effort into {weakest_name} ({weakest_score}) will boost your rank."
+        else:
+            overall_teacher_comment = f"You are in the lower half. Don't be discouraged. With consistent effort, especially in {weakest_name} ({weakest_score}), you can improve significantly."
+
+    # --- Prepare data for charts ---
     chart_subjects = [s['name'] for s in subject_details]
     chart_scores = [s['score'] for s in subject_details]
 
@@ -754,9 +784,9 @@ def my_report_card():
         form_at_time=form_at_time,
         trend_data=trend_data,
         subject_averages=subject_averages,
-        average_scores=average_scores ,
-        chart_subjects=chart_subjects,   # New: Clean list of names
-        chart_scores=chart_scores,          # for line chart
+        average_scores=average_scores,
+        chart_subjects=chart_subjects,
+        chart_scores=chart_scores,
         overall_teacher_comment=overall_teacher_comment,
         head_teacher_remark=head_teacher_remark,
         date_of_issue=datetime.now().strftime("%d %B %Y")

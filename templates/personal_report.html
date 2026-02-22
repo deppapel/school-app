@@ -252,6 +252,8 @@
             }
             .charts {
                 grid-template-columns: 1fr; /* stack charts */
+                overflow-x: auto;
+                padding-bottom: 10px;
             }
             .footer {
                 flex-direction: column;
@@ -261,6 +263,15 @@
             .signatures {
                 flex-direction: column;
                 gap: 8px;
+            }
+            .chart-container {
+                min-width: 100%;  /* Allow container to be full width */
+                padding: 8px;
+            }
+            canvas {
+                max-height: 200px;
+                width: 100% !important;
+                height: auto !important;
             }
             /* Make table scrollable horizontally on very small screens */
             .content {
@@ -296,7 +307,6 @@
                         <th>Grade</th>
                         <th>Points</th>
                         <th>Remark</th>
-                        <th>Teacher's Comment</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -313,7 +323,7 @@
                             {% else %}remark-needs{% endif %}">
                             {{ subj.remark }}
                         </td>
-                        <td>{{ subj.teacher_comment }}</td>
+                       
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -401,7 +411,7 @@
             }
         });
 
-        // Subject comparison line chart
+        // Subject comparison line chart – mobile friendly
         const subjCtx = document.getElementById('subjectChart').getContext('2d');
         new Chart(subjCtx, {
             type: 'line',
@@ -414,7 +424,10 @@
                         borderColor: '#2a5298',
                         backgroundColor: 'rgba(42, 82, 152, 0.1)',
                         tension: 0.3,
-                        fill: false
+                        fill: false,
+                        borderWidth: 2,        // Thinner line
+                        pointRadius: 3,         // Smaller points
+                        pointHoverRadius: 5
                     },
                     {
                         label: 'Class Average',
@@ -423,17 +436,39 @@
                         backgroundColor: 'rgba(180, 83, 9, 0.1)',
                         tension: 0.3,
                         borderDash: [5, 5],
-                        fill: false
+                        fill: false,
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 5
                     }
                 ]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,    // Allows us to control height via CSS
                 plugins: {
-                    title: { display: true, text: 'Subject Performance Comparison' }
+                    title: { 
+                        display: true, 
+                        text: 'Subject Performance Comparison',
+                        font: { size: window.innerWidth < 600 ? 10 : 12 } // smaller on mobile
+                    },
+                    legend: {
+                        labels: { font: { size: window.innerWidth < 600 ? 9 : 11 } }
+                    }
                 },
                 scales: {
-                    y: { beginAtZero: true, max: 100 }
+                    y: { 
+                        beginAtZero: true, 
+                        max: 100,
+                        ticks: { font: { size: window.innerWidth < 600 ? 8 : 10 } }
+                    },
+                    x: { 
+                        ticks: { 
+                            font: { size: window.innerWidth < 600 ? 8 : 10 },
+                            maxRotation: 45,      // Rotate labels to fit more
+                            minRotation: 30
+                        }
+                    }
                 }
             }
         });
